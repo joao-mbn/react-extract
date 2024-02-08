@@ -2,6 +2,7 @@
   "name": "extract",
   "displayName": "Extract",
   "description": "Extract components from your JSX",
+  "publisher": "joao-mbn",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.86.0"
@@ -9,15 +10,28 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:jsx",
+    "onLanguage:tsx"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "extract.helloWorld",
-        "title": "Hello World"
+        "command": "extract.extractComponent",
+        "title": "Extract Component"
       }
-    ]
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "extract.extractComponent",
+          "when": "false"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
