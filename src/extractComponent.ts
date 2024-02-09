@@ -22,11 +22,14 @@ export function extractComponent(document: vscode.TextDocument, range: vscode.Ra
   }
 
   content += dedent`
-    function ${componentName} (${isTypescript ? `{ ...props }: ${interfaceName}` : ""}) {
+    function ${componentName} ({ ...props }${isTypescript ? `: ${interfaceName}` : ""}) {
       return (
         ${selectedText}
       );
     }`;
 
-  console.log(content);
+  // Add the content to the bottom of the same file
+  const edit = new vscode.WorkspaceEdit();
+  edit.insert(document.uri, new vscode.Position(document.lineCount, 0), content);
+  vscode.workspace.applyEdit(edit);
 }
