@@ -40,11 +40,11 @@ export function isFileTypescript(document: vscode.TextDocument) {
 }
 
 export function countOpenTags(selectedText: string) {
-  const openTags = selectedText.match(/<(?=[a-zA-Z0-9_]|\/|>|\/>)/g);
+  const openTags = selectedText.match(/<(?=\w|\/|>|\/>)/g);
   return openTags ? openTags.length : 0;
 }
 
 export function countCloseTags(selectedText: string) {
-  const closeTags = selectedText.match(/(?<=[a-zA-Z0-9_\s\/<])>(?!>)/g);
+  const closeTags = selectedText.match(/(?<=[\w\s\/<])>(?!>)/g);
   return closeTags ? closeTags.length : 0;
 }
