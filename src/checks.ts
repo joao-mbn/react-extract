@@ -13,10 +13,10 @@ export function isSelectionLikelyJsx(document: vscode.TextDocument, range: vscod
     return false;
   }
 
-  // Checks if the number of open tags is equal to the number of closing tags
-  const openTags = selectedText.match(/</g);
-  const closeTags = selectedText.match(/>/g);
-  if (!openTags || !closeTags || openTags.length !== closeTags.length) {
+  // Checks if the number of valid open tags is equal to the number of valid closing tags. The validity check is not exhaustive.
+  const openTagsCount = countOpenTags(selectedText);
+  const closeTagsCount = countOpenTags(selectedText);
+  if (openTagsCount !== closeTagsCount) {
     return false;
   }
 
@@ -37,4 +37,14 @@ export function isSelectionLikelyJsx(document: vscode.TextDocument, range: vscod
 export function isFileTypescript(document: vscode.TextDocument) {
   const fileExtension = document.fileName.split(".").pop();
   return fileExtension === "ts" || fileExtension === "tsx";
+}
+
+export function countOpenTags(selectedText: string) {
+  const openTags = selectedText.match(/<(?=[a-zA-Z0-9_]|\/|>|\/>)/g);
+  return openTags ? openTags.length : 0;
+}
+
+export function countCloseTags(selectedText: string) {
+  const closeTags = selectedText.match(/(?<=[a-zA-Z0-9_\s\/<])>(?!>)/g);
+  return closeTags ? closeTags.length : 0;
 }
