@@ -1,6 +1,10 @@
-import * as vscode from "vscode";
+import * as vscode from 'vscode';
 
-export function isSelectionLikelyJsx(document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext) {
+export function isSelectionLikelyJsx(
+  document: vscode.TextDocument,
+  range: vscode.Range,
+  context: vscode.CodeActionContext
+) {
   const selectedText = document.getText(range).trim();
 
   // Check if selection is empty
@@ -9,7 +13,7 @@ export function isSelectionLikelyJsx(document: vscode.TextDocument, range: vscod
   }
 
   // Check if selection starts and ends with opening and closing JSX tags
-  if (!selectedText.startsWith("<") || !selectedText.endsWith(">")) {
+  if (!selectedText.startsWith('<') || !selectedText.endsWith('>')) {
     return false;
   }
 
@@ -35,8 +39,8 @@ export function isSelectionLikelyJsx(document: vscode.TextDocument, range: vscod
 }
 
 export function isFileTypescript(document: vscode.TextDocument) {
-  const fileExtension = document.fileName.split(".").pop();
-  return fileExtension === "ts" || fileExtension === "tsx";
+  const fileExtension = document.fileName.split('.').pop();
+  return fileExtension === 'ts' || fileExtension === 'tsx';
 }
 
 export function countOpenTags(selectedText: string) {
@@ -45,6 +49,6 @@ export function countOpenTags(selectedText: string) {
 }
 
 export function countCloseTags(selectedText: string) {
-  const closeTags = selectedText.match(/(?<=[\w\s\/<])>(?!>)/g);
+  const closeTags = selectedText.match(/(?<=[\w\s/<])>(?!>)/g);
   return closeTags ? closeTags.length : 0;
 }
