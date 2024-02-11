@@ -59,6 +59,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "dedent": "^1.5.1"
+    "dedent": "^1.5.1",
+    "xregexp": "^5.1.1"
   }
 }
