@@ -38,8 +38,12 @@ export function extractProps(selectedText: string): ExtractedProps[] {
   // (["prop{whitespace}='value'", "prop{whitespace}", "'value'"])[]
   const stringProps = [...selectedText.matchAll(/(\w+)\s*=\s*("[^"]+"|'[^']+')/g)];
 
+  // "prop"[]
+  const implicitlyTrueProps =
+    selectedText.match(/(?<=[\s}])\w+(?=(\s*[/>]|\s+\w+))(?!\s*\w*["'}])/g)?.map((m) => [m, m, '']) ?? [];
+
   // (["prop{whitespace}={value}", "prop{whitespace}", "{value}"])[]
-  const matchesGrouped = XRegExp.matchRecursive(selectedText, '{', '}', 'g', {
+  const insideCurlyProps = XRegExp.matchRecursive(selectedText, '{', '}', 'g', {
     valueNames: ['between', null, 'match', null],
     unbalanced: 'skip-lazy',
   }).reduce(
@@ -71,28 +75,26 @@ export function extractProps(selectedText: string): ExtractedProps[] {
     [] as [string, string, string][]
   );
 
-  return (
-    [...stringProps, ...matchesGrouped]
-      .map((match, index) => {
-        const [pair, prop, value] = match;
-        return { pair: pair.trim(), prop: prop.trim(), value: value.trim(), index };
-      })
-      .map((entry, i, self) => {
-        const { index: _a, ...rest } = entry;
+  return [...stringProps, ...implicitlyTrueProps, ...insideCurlyProps]
+    .map((match, index) => {
+      const [pair, prop, value] = match;
+      return { pair: pair.trim(), prop: prop.trim(), value: value.trim(), index, implicitlyTrue: !value };
+    })
+    .map((entry, _, self) => {
+      const { index: __, ...rest } = entry;
 
-        /* appends a prop alias to differentiate props that appears multiple times */
-        const repeatedProps = self.filter((e) => e.prop === entry.prop);
-        if (repeatedProps.length > 1) {
-          const repetitionOccurenceIndex = repeatedProps.findIndex((rp) => rp.index === entry.index);
-          return {
-            ...rest,
-            propAlias: `${entry.prop}${repetitionOccurenceIndex > 0 ? repetitionOccurenceIndex + 1 : ''}`,
-          };
-        }
+      /* appends a prop alias to differentiate props that appears multiple times */
+      const repeatedProps = self.filter((e) => e.prop === entry.prop);
+      if (repeatedProps.length > 1) {
+        const repetitionOccurenceIndex = repeatedProps.findIndex((rp) => rp.index === entry.index);
+        return {
+          ...rest,
+          propAlias: `${entry.prop}${repetitionOccurenceIndex > 0 ? repetitionOccurenceIndex + 1 : ''}`,
+        };
+      }
 
-        return { ...rest, propAlias: entry.prop };
-      }) ?? []
-  );
+      return { ...rest, propAlias: entry.prop };
+    });
 }
 
 export function buildExtractedComponent(
@@ -114,7 +116,7 @@ export function buildExtractedComponent(
 
   // replace selectedText substrings matching entries values with entries propAlias
   const parsedText = props.reduce(
-    (accParsedText, currEntry) => accParsedText.replace(currEntry.value, `{${currEntry.propAlias}}`),
+    (accParsedText, { pair, propAlias, prop }) => accParsedText.replace(pair, `${prop}={${propAlias}}`),
     selectedText
   );
 

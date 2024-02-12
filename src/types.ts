@@ -3,4 +3,5 @@ export type ExtractedProps = {
   prop: string;
   value: string;
   propAlias: string;
+  implicitlyTrue: boolean;
 };
