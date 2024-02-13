@@ -15,14 +15,7 @@ export async function extractComponent(document: vscode.TextDocument, range: vsc
     return;
   }
 
-  const selectedText = document.getText(range).trim();
-
-  const props = extractProps(selectedText);
-
-  const isTypescript = isFileTypescript(document);
-  const extractedComponent = buildExtractedComponent(componentName, isTypescript, props, selectedText);
-
-  const extractedComponentReference = buildExtractedComponentReference(componentName, props);
+  const { extractedComponent, extractedComponentReference } = extract(document, range, componentName);
 
   // Add the content to the bottom of the same file
   const edit = new vscode.WorkspaceEdit();
@@ -32,6 +25,18 @@ export async function extractComponent(document: vscode.TextDocument, range: vsc
   edit.replace(document.uri, range, extractedComponentReference);
 
   vscode.workspace.applyEdit(edit);
+}
+
+export function extract(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, componentName: string) {
+  const selectedText = document.getText(range).trim();
+
+  const props = extractProps(selectedText);
+
+  const isTypescript = isFileTypescript(document);
+  const extractedComponent = buildExtractedComponent(componentName, isTypescript, props, selectedText);
+
+  const extractedComponentReference = buildExtractedComponentReference(componentName, props);
+  return { extractedComponent, extractedComponentReference };
 }
 
 export function extractProps(selectedText: string): ExtractedProps[] {
