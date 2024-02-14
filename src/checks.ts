@@ -39,8 +39,7 @@ export function isSelectionLikelyJsx(
 }
 
 export function isFileTypescript(document: vscode.TextDocument) {
-  const fileExtension = document.fileName.split('.').pop();
-  return fileExtension === 'ts' || fileExtension === 'tsx';
+  return document.languageId === 'typescript' || document.languageId === 'typescriptreact';
 }
 
 export function countOpenTags(selectedText: string) {

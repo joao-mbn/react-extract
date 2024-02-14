@@ -46,7 +46,7 @@ function visit(args: VisitorArguments) {
       if (ts.isJsxAttribute(prop)) {
         props.updateProps({ ...newProp, name: prop.name.getText(), isSpread: false });
       } else {
-        props.updateProps({ ...newProp, isSpread: false, name: prop.expression.getText() });
+        props.updateProps({ ...newProp, name: prop.expression.getText(), isSpread: true });
       }
     }
   }

@@ -2,7 +2,6 @@ import dedent from 'dedent';
 import * as vscode from 'vscode';
 import { isFileTypescript } from './checks';
 import { extractPropsWithTypescript } from './extractPropsWithTypescript';
-import { ExtractedProp } from './types';
 
 export async function extractComponent(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
   const componentName = await vscode.window.showInputBox({
@@ -13,22 +12,21 @@ export async function extractComponent(document: vscode.TextDocument, range: vsc
   // If the user clears the input or cancels the input, it's implied that the user doesn't want to proceed.
   if (!componentName) return;
 
-  const props = extractPropsWithTypescript(document, range);
-
-  await buildExtractedComponent(document, range, componentName, props);
+  await buildExtractedComponent(document, range, componentName);
 }
 
 export async function buildExtractedComponent(
   document: vscode.TextDocument,
   range: vscode.Range,
-  componentName: string,
-  props: ExtractedProp[]
+  componentName: string
 ) {
   const isTypescript = isFileTypescript(document);
 
-  const editor = await vscode.window.showTextDocument(document);
-  let totalLineChange = 0;
+  const props = extractPropsWithTypescript(document, range);
 
+  const editor = await vscode.window.showTextDocument(document);
+
+  let totalLineChange = 0;
   const isSuccess = await editor.edit((editBuilder) => {
     // Perform batch edit on the original selected text replacing the props with their reference (propAlias)
     for (const { range, name, propAlias } of props) {
