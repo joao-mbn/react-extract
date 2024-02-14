@@ -1,7 +1,8 @@
 import dedent from 'dedent';
 import * as vscode from 'vscode';
 import { isFileTypescript } from './checks';
-import { extractPropsWithTypescript } from './extractPropsWithTypescript';
+import { extractJsxProps } from './extractJsxProps';
+import { extractTsxProps } from './extractTsxProps';
 
 export async function extractComponent(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
   const componentName = await vscode.window.showInputBox({
@@ -22,7 +23,7 @@ export async function buildExtractedComponent(
 ) {
   const isTypescript = isFileTypescript(document);
 
-  const props = extractPropsWithTypescript(document, range);
+  const props = isTypescript ? extractTsxProps(document, range) : extractJsxProps(document, range);
 
   const editor = await vscode.window.showTextDocument(document);
 

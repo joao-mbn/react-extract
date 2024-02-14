@@ -26,22 +26,31 @@ async function getDocuments(folder: string) {
     jsTestFilePath && vscode.workspace.openTextDocument(path.join(filePath, jsTestFilePath)),
   ]);
 
-  return { tsResult, tsTest, jsResult, jsTest } as Record<string, vscode.TextDocument>;
+  return { tsResult, tsTest, jsResult, jsTest } as Record<
+    'tsResult' | 'tsTest' | 'jsResult' | 'jsTest',
+    vscode.TextDocument
+  >;
 }
 
 suite('buildExtractedComponent', function () {
-  test('should build extract a simple nested component with repeated props', async function () {
-    const { tsTest, tsResult } = await getDocuments('simple');
-    const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(9, 10));
+  suite('extract a simple nested component with repeated props', function () {
     const componentName = 'Extracted';
 
-    await buildExtractedComponent(tsTest, range, componentName);
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(9, 10));
+      const { tsTest, tsResult } = await getDocuments('simple');
+      await buildExtractedComponent(tsTest, range, componentName);
+      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+    });
 
-    assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+    test('with javascript', async function () {
+      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(9, 10));
+      const { jsTest, jsResult } = await getDocuments('simple');
+      await buildExtractedComponent(jsTest, range, componentName);
+      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+    });
   });
-});
 
-suite('buildExtractedComponent', function () {
   test('should build extract a simple nested component with implictly true variables', async function () {
     const { tsTest, tsResult } = await getDocuments('implicit');
     const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(9, 10));
