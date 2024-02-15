@@ -1,4 +1,3 @@
-import dedent from 'dedent';
 import * as vscode from 'vscode';
 import { isFileTypescript } from './checks';
 import { extractJsxProps } from './extractJsxProps';
@@ -52,7 +51,7 @@ export async function buildExtractedComponent(
     const shouldDisplayInterface = isTypescript && props.length > 0;
 
     const interfaceName = `${componentName}Props`;
-    const interfaceDeclaration = dedent`\n
+    const interfaceDeclaration = `\n
       interface ${interfaceName} {
         ${referencedProps
           .map((prop) => `${prop.propAlias}: ${prop.type}`)
@@ -61,7 +60,7 @@ export async function buildExtractedComponent(
       }\n
     `;
 
-    const updatedSelectedText = dedent`
+    const updatedSelectedText = `
       ${shouldDisplayInterface ? interfaceDeclaration : ''}\n
 
       function ${componentName}(
@@ -95,7 +94,7 @@ export async function buildExtractedComponent(
      * replaced with their reference (propAlias) in the extracted component, while the values are kept.
      * Example: <Component propAlias={value} />
      */
-    const componentReference = dedent`
+    const componentReference = `
       <${componentName}
         ${referencedProps.map((prop) => `${prop.pair.replace(/\w+(?==)/, prop.propAlias)}`).join('\n')}
       />
