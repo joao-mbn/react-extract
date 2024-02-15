@@ -51,13 +51,21 @@ suite('buildExtractedComponent', function () {
     });
   });
 
-  test('should build extract a simple nested component with implictly true variables', async function () {
-    const { tsTest, tsResult } = await getDocuments('implicit');
-    const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(9, 10));
+  suite('extract a component with static props', function () {
     const componentName = 'Extracted';
 
-    await buildExtractedComponent(tsTest, range, componentName);
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(15, 10));
+      const { tsTest, tsResult } = await getDocuments('static');
+      await buildExtractedComponent(tsTest, range, componentName);
+      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+    });
 
-    assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+    test('with javascript', async function () {
+      const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(15, 10));
+      const { jsTest, jsResult } = await getDocuments('static');
+      await buildExtractedComponent(jsTest, range, componentName);
+      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+    });
   });
 });

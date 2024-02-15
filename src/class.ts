@@ -6,9 +6,16 @@ export class ExtractedProps {
 
   constructor() {}
 
-  updateProps(newProp: Omit<ExtractedProp, 'propAlias'>) {
-    const countOfPropsWithSameName = Object.values(this.props).filter(({ name: prop }) => prop === newProp.name).length;
-    const propAlias = `${newProp.name}${countOfPropsWithSameName === 0 ? '' : countOfPropsWithSameName + 1}`;
-    this.props[propAlias] = { ...newProp, propAlias };
+  updateProps(newProp: Omit<ExtractedProp, 'propAlias' | 'propId'>) {
+    const propsWithSameName = Object.values(this.props).filter(({ name }) => name === newProp.name);
+    const nonStaticPropsWithSameName = propsWithSameName.filter(({ isStatic }) => !isStatic);
+
+    const countOfPropsWithSameName = propsWithSameName.length;
+    const countOfNonStaticPropsWithSameName = nonStaticPropsWithSameName.length;
+
+    const propId = `${newProp.name}${countOfPropsWithSameName === 0 ? '' : countOfPropsWithSameName + 1}`;
+    const propAlias = `${newProp.name}${countOfNonStaticPropsWithSameName === 0 ? '' : countOfNonStaticPropsWithSameName + 1}`;
+
+    this.props[propId] = { ...newProp, propAlias, propId };
   }
 }

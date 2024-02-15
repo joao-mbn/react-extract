@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react';
 
 function Component() {
-  const message = "Text as Child"
+  const message = 'Text as Child';
 
   return (
     <div className="w-full">

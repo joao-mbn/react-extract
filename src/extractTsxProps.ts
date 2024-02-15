@@ -44,9 +44,11 @@ function visit(args: VisitorArguments) {
       };
 
       if (ts.isJsxAttribute(prop)) {
-        props.updateProps({ ...newProp, name: prop.name.getText(), isSpread: false });
+        const isStatic = isValueStatic(prop, checker);
+
+        props.updateProps({ ...newProp, name: prop.name.getText(), isSpread: false, isStatic });
       } else {
-        props.updateProps({ ...newProp, name: prop.expression.getText(), isSpread: true });
+        props.updateProps({ ...newProp, name: prop.expression.getText(), isSpread: true, isStatic: false });
       }
     }
   }
@@ -58,4 +60,31 @@ function getNodeRange(node: ts.Node, sourceFile: ts.SourceFile) {
   const start = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
   const end = sourceFile.getLineAndCharacterOfPosition(node.end);
   return new vscode.Range(start.line, start.character, end.line, end.character);
+}
+
+function isValueStatic(attribute: ts.JsxAttribute, checker: ts.TypeChecker) {
+  let isValueStatic = false;
+  if (attribute.initializer?.kind === ts.SyntaxKind.StringLiteral) {
+    isValueStatic = true;
+  } else if (attribute.initializer?.kind === ts.SyntaxKind.JsxExpression) {
+    const expression = attribute.initializer.expression;
+    if (!expression) {
+      isValueStatic = true;
+    } else if (ts.isLiteralExpression(expression)) {
+      isValueStatic = true;
+    } else if (ts.isIdentifier(expression)) {
+      const symbol = checker.getSymbolAtLocation(expression);
+
+      const declarations = symbol?.getDeclarations();
+      if (!declarations || declarations.length === 0) {
+        isValueStatic = true;
+      } else {
+        isValueStatic = declarations.every((d) => d.kind === ts.SyntaxKind.ImportSpecifier);
+      }
+    }
+  }
+
+  // TODO: handle other types of JsxExpression and expression types
+
+  return isValueStatic;
 }

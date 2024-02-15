@@ -1,9 +1,5 @@
-import React from "react";
+import React from 'react';
 
 function Component() {
-  return (
-    <div>
-      {true ? <i className="warning" /> : <i className="ok" />}
-    </div>
-  );
+  return <div>{true ? <i className="warning" /> : <i className="ok" />}</div>;
 }

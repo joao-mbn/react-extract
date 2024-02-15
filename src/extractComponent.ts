@@ -10,6 +10,8 @@ export async function extractComponent(document: vscode.TextDocument, range: vsc
     title: 'Give the extracted component a name',
   });
 
+  console.log(document.fileName, range.start.line, range.start.character, range.end.line, range.end.character);
+
   // If the user clears the input or cancels the input, it's implied that the user doesn't want to proceed.
   if (!componentName) return;
 
@@ -27,10 +29,12 @@ export async function buildExtractedComponent(
 
   const editor = await vscode.window.showTextDocument(document);
 
+  const referencedProps = props.filter((prop) => !prop.isStatic);
+
   let totalLineChange = 0;
   const isSuccess = await editor.edit((editBuilder) => {
     // Perform batch edit on the original selected text replacing the props with their reference (propAlias)
-    for (const { range, name, propAlias } of props) {
+    for (const { range, name, propAlias } of referencedProps) {
       const originalLineCount = range.end.line - range.start.line + 1;
       const updatedText = `${name}={${propAlias}}`;
       const updatedLineCount = 1; // updatedText is always one line long
@@ -50,18 +54,18 @@ export async function buildExtractedComponent(
     const interfaceName = `${componentName}Props`;
     const interfaceDeclaration = dedent`\n
       interface ${interfaceName} {
-        ${props
+        ${referencedProps
           .map((prop) => `${prop.propAlias}: ${prop.type}`)
           .join(';\n')
           .concat(';')}
-        }\n
+      }\n
     `;
 
     const updatedSelectedText = dedent`
       ${shouldDisplayInterface ? interfaceDeclaration : ''}\n
 
       function ${componentName}(
-        ${props.length > 0 ? `{ ${props.map((e) => e.propAlias).join(',\n')} }` : ''}
+        ${referencedProps.length > 0 ? `{ ${referencedProps.map((e) => e.propAlias).join(',\n')} }` : ''}
         ${shouldDisplayInterface ? `: ${interfaceName}` : ''}
       ) {
         return (
@@ -93,7 +97,7 @@ export async function buildExtractedComponent(
      */
     const componentReference = dedent`
       <${componentName}
-        ${props.map((prop) => `${prop.pair.replace(/\w+(?==)/, prop.propAlias)}`).join('\n')}
+        ${referencedProps.map((prop) => `${prop.pair.replace(/\w+(?==)/, prop.propAlias)}`).join('\n')}
       />
     `;
     editBuilder.replace(rangeAfterReplaces, componentReference);
