@@ -1,7 +1,12 @@
-export type ExtractedProps = {
+import * as vscode from 'vscode';
+
+export type ExtractedProp = {
   pair: string;
-  prop: string;
-  value: string;
+  name: string;
   propAlias: string;
-  implicitlyTrue: boolean;
+  isSpread: boolean;
+  type: string;
+  range: vscode.Range;
+  isStatic: boolean;
+  propId: string;
 };

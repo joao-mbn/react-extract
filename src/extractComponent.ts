@@ -1,8 +1,8 @@
 import dedent from 'dedent';
 import * as vscode from 'vscode';
-import XRegExp from 'xregexp';
 import { isFileTypescript } from './checks';
-import { ExtractedProps } from './types';
+import { extractJsxProps } from './extractJsxProps';
+import { extractTsxProps } from './extractTsxProps';
 
 export async function extractComponent(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
   const componentName = await vscode.window.showInputBox({
@@ -10,139 +10,96 @@ export async function extractComponent(document: vscode.TextDocument, range: vsc
     title: 'Give the extracted component a name',
   });
 
+  console.log(document.fileName, range.start.line, range.start.character, range.end.line, range.end.character);
+
   // If the user clears the input or cancels the input, it's implied that the user doesn't want to proceed.
-  if (!componentName) {
-    return;
-  }
+  if (!componentName) return;
 
-  const selectedText = document.getText(range).trim();
-
-  const props = extractProps(selectedText);
-
-  const isTypescript = isFileTypescript(document);
-  const extractedComponent = buildExtractedComponent(componentName, isTypescript, props, selectedText);
-
-  const extractedComponentReference = buildExtractedComponentReference(componentName, props);
-
-  // Add the content to the bottom of the same file
-  const edit = new vscode.WorkspaceEdit();
-  edit.insert(document.uri, new vscode.Position(document.lineCount, 0), extractedComponent);
-
-  // Adds the new component instance, in place of the selected text
-  edit.replace(document.uri, range, extractedComponentReference);
-
-  vscode.workspace.applyEdit(edit);
+  await buildExtractedComponent(document, range, componentName);
 }
 
-export function extractProps(selectedText: string): ExtractedProps[] {
-  // (["prop{whitespace}='value'", "prop{whitespace}", "'value'"])[]
-  const stringProps = [...selectedText.matchAll(/(\w+)\s*=\s*("[^"]+"|'[^']+')/g)];
-
-  // "prop"[]
-  const implicitlyTrueProps =
-    selectedText.match(/(?<=[\s}])\w+(?=(\s*[/>]|\s+\w+))(?!\s*\w*["'}])/g)?.map((m) => [m, m, '']) ?? [];
-
-  // (["prop{whitespace}={value}", "prop{whitespace}", "{value}"])[]
-  const insideCurlyProps = XRegExp.matchRecursive(selectedText, '{', '}', 'g', {
-    valueNames: ['between', null, 'match', null],
-    unbalanced: 'skip-lazy',
-  }).reduce(
-    (acc, curr, index, self) => {
-      const next = self[index + 1];
-      if (next == null) {
-        return acc;
-      }
-
-      // "prop{whitespace}="
-      const prop = curr.value.match(/(\w+)\s*=(?![\s\S]*(\w+)\s*=)/)?.[0];
-
-      if (prop == null) {
-        return acc;
-      }
-
-      const value = `{${next.value}}`;
-
-      if (index % 2 === 0) {
-        acc.push([
-          `${prop}${value}`,
-          prop.substring(0, prop.length - 1), // remove "="
-          value,
-        ]);
-      }
-
-      return acc;
-    },
-    [] as [string, string, string][]
-  );
-
-  return [...stringProps, ...implicitlyTrueProps, ...insideCurlyProps]
-    .map((match, index) => {
-      const [pair, prop, value] = match;
-      return { pair: pair.trim(), prop: prop.trim(), value: value.trim(), index, implicitlyTrue: !value };
-    })
-    .map((entry, _, self) => {
-      const { index: __, ...rest } = entry;
-
-      /* appends a prop alias to differentiate props that appears multiple times */
-      const repeatedProps = self.filter((e) => e.prop === entry.prop);
-      if (repeatedProps.length > 1) {
-        const repetitionOccurenceIndex = repeatedProps.findIndex((rp) => rp.index === entry.index);
-        return {
-          ...rest,
-          propAlias: `${entry.prop}${repetitionOccurenceIndex > 0 ? repetitionOccurenceIndex + 1 : ''}`,
-        };
-      }
-
-      return { ...rest, propAlias: entry.prop };
-    });
-}
-
-export function buildExtractedComponent(
-  componentName: string,
-  isTypescript: boolean,
-  props: ExtractedProps[],
-  selectedText: string
+export async function buildExtractedComponent(
+  document: vscode.TextDocument,
+  range: vscode.Range,
+  componentName: string
 ) {
-  const interfaceName = `${componentName}Props`;
+  const isTypescript = isFileTypescript(document);
 
-  const interfaceDeclaration = dedent`\n
-    interface ${interfaceName} {
-      ${props
-        .map((e) => `${e.propAlias}: unknown`)
-        .join(';\n')
-        .concat(';')}
-      }\n
-  `;
+  const props = isTypescript ? extractTsxProps(document, range) : extractJsxProps(document, range);
 
-  // replace selectedText substrings matching entries values with entries propAlias
-  const parsedText = props.reduce(
-    (accParsedText, { pair, propAlias, prop }) => accParsedText.replace(pair, `${prop}={${propAlias}}`),
-    selectedText
-  );
+  const editor = await vscode.window.showTextDocument(document);
 
-  const shouldDisplayInterface = isTypescript && props.length > 0;
+  const referencedProps = props.filter((prop) => !prop.isStatic);
 
-  const functionDeclaration = dedent`
-    function ${componentName}(
-      ${props.length > 0 ? `{ ${props.map((e) => e.propAlias).join(',\n')} }` : ''}
-      ${shouldDisplayInterface ? `: ${interfaceName}` : ''}
-    ) {
-      return (
-        ${parsedText}
-      );
+  let totalLineChange = 0;
+  const isSuccess = await editor.edit((editBuilder) => {
+    // Perform batch edit on the original selected text replacing the props with their reference (propAlias)
+    for (const { range, name, propAlias } of referencedProps) {
+      const originalLineCount = range.end.line - range.start.line + 1;
+      const updatedText = `${name}={${propAlias}}`;
+      const updatedLineCount = 1; // updatedText is always one line long
+      totalLineChange += updatedLineCount - originalLineCount;
+      editBuilder.replace(range, updatedText);
     }
-  `;
+  });
 
-  return dedent`
-    ${shouldDisplayInterface ? interfaceDeclaration : ''}\n
+  if (!isSuccess) return;
 
-    ${functionDeclaration}
-  `;
-}
+  const newEndLine = range.end.line + totalLineChange;
+  const rangeAfterReplaces = new vscode.Range(range.start, new vscode.Position(newEndLine, range.end.character));
 
-export function buildExtractedComponentReference(componentName: string, props: ExtractedProps[]) {
-  return dedent`
-    <${componentName}
-      ${props.map((e) => `${e.pair}`).join('\n')}
-    />`;
+  await editor.edit((editBuilder) => {
+    const shouldDisplayInterface = isTypescript && props.length > 0;
+
+    const interfaceName = `${componentName}Props`;
+    const interfaceDeclaration = dedent`\n
+      interface ${interfaceName} {
+        ${referencedProps
+          .map((prop) => `${prop.propAlias}: ${prop.type}`)
+          .join(';\n')
+          .concat(';')}
+      }\n
+    `;
+
+    const updatedSelectedText = dedent`
+      ${shouldDisplayInterface ? interfaceDeclaration : ''}\n
+
+      function ${componentName}(
+        ${referencedProps.length > 0 ? `{ ${referencedProps.map((e) => e.propAlias).join(',\n')} }` : ''}
+        ${shouldDisplayInterface ? `: ${interfaceName}` : ''}
+      ) {
+        return (
+          ${document.getText(rangeAfterReplaces)}
+        );
+      }
+    `;
+
+    /**
+     * Insert the extracted component at the end of the document.
+     * Example:
+     * function Component({ propAlias }) {
+     *    return (
+     *      <div>
+     *         <Child1 prop={propAlias} />
+     *         <Child2 />
+     *      </div>
+     *    );
+     * }
+     */
+    const lastLine = document.lineAt(document.lineCount - 1);
+    const endOfDocument = new vscode.Position(lastLine.lineNumber, lastLine.text.length);
+    editBuilder.insert(endOfDocument, '\n' + updatedSelectedText);
+
+    /**
+     * Replace the selected text with the component reference, where the original prop names are
+     * replaced with their reference (propAlias) in the extracted component, while the values are kept.
+     * Example: <Component propAlias={value} />
+     */
+    const componentReference = dedent`
+      <${componentName}
+        ${referencedProps.map((prop) => `${prop.pair.replace(/\w+(?==)/, prop.propAlias)}`).join('\n')}
+      />
+    `;
+    editBuilder.replace(rangeAfterReplaces, componentReference);
+  });
 }
