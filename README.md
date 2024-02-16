@@ -16,7 +16,7 @@ This extension for Visual Studio Code provides a quick way to refactor your Reac
 
 - **Code Extraction**: Select a valid piece of React component code that you want to refactor.
 
-- **Quick Refactor Action**: Use the Code Actions feature (`Ctrl +` . or `Cmd + .`, by default) to initiate the refactoring process.
+- **Quick Refactor Action**: Use the Code Actions feature (`Ctrl + .` or `Cmd + .`, by default) to initiate the refactoring process.
 
 - **Component Naming**: Pass the component name at the input prompt.
 
