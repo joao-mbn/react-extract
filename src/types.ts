@@ -7,6 +7,6 @@ export type ExtractedProp = {
   isSpread: boolean;
   type: string;
   range: vscode.Range;
-  isStatic: boolean;
+  isLiteral: boolean;
   propId: string;
 };

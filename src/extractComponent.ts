@@ -9,6 +9,7 @@ export async function extractComponent(document: vscode.TextDocument, range: vsc
     title: 'Give the extracted component a name',
   });
 
+  // TODO: Remove this console.log after getting the correct range for the test cases.
   console.log(document.fileName, range.start.line, range.start.character, range.end.line, range.end.character);
 
   // If the user clears the input or cancels the input, it's implied that the user doesn't want to proceed.
@@ -28,7 +29,7 @@ export async function buildExtractedComponent(
 
   const editor = await vscode.window.showTextDocument(document);
 
-  const referencedProps = props.filter((prop) => !prop.isStatic);
+  const referencedProps = props.filter((prop) => !prop.isLiteral);
 
   let totalLineChange = 0;
   const isSuccess = await editor.edit((editBuilder) => {
@@ -48,7 +49,7 @@ export async function buildExtractedComponent(
   const rangeAfterReplaces = new vscode.Range(range.start, new vscode.Position(newEndLine, range.end.character));
 
   await editor.edit((editBuilder) => {
-    const shouldDisplayInterface = isTypescript && props.length > 0;
+    const shouldDisplayInterface = isTypescript && referencedProps.length > 0;
 
     const interfaceName = `${componentName}Props`;
     const interfaceDeclaration = `\n

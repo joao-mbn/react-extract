@@ -8,6 +8,7 @@ function Component() {
       <button disabled>Submit</button>
       <button disabled={false}>Do this</button>
       <button disabled={isDisabled}>Do this</button>
+      <button disabled={undefined}>Do this</button>
       <input disabled placeholder="Type here" />
     </form>
   );

@@ -1,5 +1,5 @@
 import * as parser from '@babel/parser';
-import traverse, { Node, NodePath } from '@babel/traverse';
+import traverse, { NodePath } from '@babel/traverse';
 import { JSXAttribute, JSXOpeningElement } from '@babel/types';
 import * as vscode from 'vscode';
 import { ExtractedProps } from './class';
@@ -32,11 +32,11 @@ export function extractJsxProps(document: vscode.TextDocument, range: vscode.Ran
         const newProp = { pair, name, range, type: 'irrelevant' };
 
         if (attribute.type === 'JSXAttribute') {
-          const isStatic = isValueStatic(attribute, path);
+          const isStatic = isValueLiteral(attribute, path);
 
-          props.updateProps({ ...newProp, isSpread: false, isStatic });
+          props.updateProps({ ...newProp, isSpread: false, isLiteral: isStatic });
         } else {
-          props.updateProps({ ...newProp, isSpread: true, isStatic: false });
+          props.updateProps({ ...newProp, isSpread: true, isLiteral: false });
         }
       }
     },
@@ -45,29 +45,38 @@ export function extractJsxProps(document: vscode.TextDocument, range: vscode.Ran
   return Object.values(props.props);
 }
 
-function isValueStatic(attribute: JSXAttribute, path: NodePath<JSXOpeningElement>) {
-  let isValueStatic = false;
-  if (attribute.value?.type === 'StringLiteral') {
-    isValueStatic = true;
-  } else if (attribute.value?.type === 'JSXExpressionContainer') {
+function isValueLiteral(attribute: JSXAttribute, path: NodePath<JSXOpeningElement>) {
+  // prop [implicitly true]
+  if (!attribute.value) return true;
+
+  // prop="value"
+  if (attribute.value.type === 'StringLiteral') {
+    return true;
+  }
+
+  // prop={value}
+  if (attribute.value?.type === 'JSXExpressionContainer') {
     const expression = attribute.value.expression;
-    if (expression.type.toString()?.includes('Literal')) {
-      isValueStatic = true;
-    } else if (expression.type === 'Identifier') {
+
+    // null | true | false | string | number | regex passed as literals
+    if (expression.type.toString().includes('Literal')) {
+      return expression.type === 'TemplateLiteral' ? expression.expressions.length === 0 : true;
+    }
+
+    if (expression.type === 'Identifier') {
+      // undefined literal
+      if (expression.name === 'undefined') return true;
+
       const binding = path.scope.getBinding(expression.name);
+      if (!binding) return true;
 
-      const importSpecifiers: NodePath<Node>['type'][] = [
-        'ImportSpecifier',
-        'ImportDefaultSpecifier',
-        'ImportNamespaceSpecifier',
-      ];
-      const isDeclaredInScope = binding && !importSpecifiers.includes(binding.path.type);
-
-      isValueStatic = !isDeclaredInScope;
+      // imported variables passed as is are considered static
+      return binding.path.type === 'ImportSpecifier';
     }
   }
 
+  // TODO: Handle template literals actually using interpolations
   // TODO: handle other types of JSXExpressionContainer and expression types
 
-  return isValueStatic;
+  return false;
 }

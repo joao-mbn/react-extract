@@ -8,7 +8,7 @@ export class ExtractedProps {
 
   updateProps(newProp: Omit<ExtractedProp, 'propAlias' | 'propId'>) {
     const propsWithSameName = Object.values(this.props).filter(({ name }) => name === newProp.name);
-    const nonStaticPropsWithSameName = propsWithSameName.filter(({ isStatic }) => !isStatic);
+    const nonStaticPropsWithSameName = propsWithSameName.filter(({ isLiteral: isStatic }) => !isStatic);
 
     const countOfPropsWithSameName = propsWithSameName.length;
     const countOfNonStaticPropsWithSameName = nonStaticPropsWithSameName.length;

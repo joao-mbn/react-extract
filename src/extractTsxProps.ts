@@ -39,21 +39,25 @@ function visit(args: VisitorArguments) {
 
       const newProp = {
         pair: prop.getText(),
-        type: checker.typeToString(checker.getTypeAtLocation(prop)),
+        type: getPropType(checker, prop),
         range: getNodeRange(prop, sourceFile),
       };
 
       if (ts.isJsxAttribute(prop)) {
-        const isStatic = isValueStatic(prop, checker);
+        const isStatic = isValueLiteral(prop, checker);
 
-        props.updateProps({ ...newProp, name: prop.name.getText(), isSpread: false, isStatic });
+        props.updateProps({ ...newProp, name: prop.name.getText(), isSpread: false, isLiteral: isStatic });
       } else {
-        props.updateProps({ ...newProp, name: prop.expression.getText(), isSpread: true, isStatic: false });
+        props.updateProps({ ...newProp, name: prop.expression.getText(), isSpread: true, isLiteral: false });
       }
     }
   }
 
   ts.forEachChild(node, (node) => visit({ ...args, node }));
+}
+
+function getPropType(checker: ts.TypeChecker, prop: ts.JsxAttributeLike) {
+  return checker.typeToString(checker.getTypeAtLocation(prop));
 }
 
 function getNodeRange(node: ts.Node, sourceFile: ts.SourceFile) {
@@ -62,29 +66,40 @@ function getNodeRange(node: ts.Node, sourceFile: ts.SourceFile) {
   return new vscode.Range(start.line, start.character, end.line, end.character);
 }
 
-function isValueStatic(attribute: ts.JsxAttribute, checker: ts.TypeChecker) {
-  let isValueStatic = false;
-  if (attribute.initializer?.kind === ts.SyntaxKind.StringLiteral) {
-    isValueStatic = true;
-  } else if (attribute.initializer?.kind === ts.SyntaxKind.JsxExpression) {
+function isValueLiteral(attribute: ts.JsxAttribute, checker: ts.TypeChecker) {
+  // prop [implicitly true]
+  if (!attribute.initializer?.kind) return true;
+
+  // prop="value"
+  if (attribute.initializer.kind === ts.SyntaxKind.StringLiteral) {
+    return true;
+  }
+
+  // prop={value}
+  if (attribute.initializer.kind === ts.SyntaxKind.JsxExpression) {
     const expression = attribute.initializer.expression;
-    if (!expression) {
-      isValueStatic = true;
-    } else if (ts.isLiteralExpression(expression)) {
-      isValueStatic = true;
-    } else if (ts.isIdentifier(expression)) {
+
+    if (!expression) return true;
+
+    // null | true | false | string | number | regex passed as literals
+    if (ts.isLiteralTypeLiteral(expression)) return true;
+
+    if (ts.isIdentifier(expression)) {
       const symbol = checker.getSymbolAtLocation(expression);
 
+      // undefined literal
+      if (symbol?.escapedName === 'undefined') return true;
+
       const declarations = symbol?.getDeclarations();
-      if (!declarations || declarations.length === 0) {
-        isValueStatic = true;
-      } else {
-        isValueStatic = declarations.every((d) => d.kind === ts.SyntaxKind.ImportSpecifier);
-      }
+      if (!declarations || declarations.length === 0) return true;
+
+      // imported variables passed as is are considered static
+      return declarations.every((d) => d.kind === ts.SyntaxKind.ImportSpecifier);
     }
   }
 
+  // TODO: Handle template literals actually using interpolations
   // TODO: handle other types of JsxExpression and expression types
 
-  return isValueStatic;
+  return false;
 }

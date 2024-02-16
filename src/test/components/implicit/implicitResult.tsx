@@ -4,7 +4,9 @@ function Component() {
   const isDisabled = Math.random() > 0.5;
 
   return (
-    <Extracted disabled={isDisabled} />
+    <Extracted
+      disabled={isDisabled}
+    />
   );
 }
 
@@ -18,6 +20,7 @@ function Extracted({ disabled }: ExtractedProps) {
       <button disabled>Submit</button>
       <button disabled={false}>Do this</button>
       <button disabled={disabled}>Do this</button>
+      <button disabled={undefined}>Do this</button>
       <input disabled placeholder="Type here" />
     </form>
   );
