@@ -56,14 +56,14 @@ suite('buildExtractedComponent', function () {
 
     test('with typescript', async function () {
       const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(11, 7));
-      const { tsTest, tsResult } = await getDocuments('fragments');
+      const { tsTest, tsResult } = await getDocuments('fragment');
       await buildExtractedComponent(tsTest, range, componentName);
       assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(11, 7));
-      const { jsTest, jsResult } = await getDocuments('fragments');
+      const { jsTest, jsResult } = await getDocuments('fragment');
       await buildExtractedComponent(jsTest, range, componentName);
       assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
     });
