@@ -9,9 +9,17 @@ export function extractTsxProps(document: vscode.TextDocument, range: vscode.Ran
   const sourceFile = program.getSourceFile(document.uri.fsPath);
   if (!sourceFile) return [];
 
+  // TODO: Handle template literals actually using interpolations
+  // TODO: handle other types of JsxExpression and expression types
   const props = new ExtractedProps();
-
   ts.forEachChild(sourceFile, (node) => visit({ node, sourceFile, range, checker, props }));
+
+  // TODO: Handle SpreadAssignment
+  // TODO: Handle props that constantes outside the function scope but inside the file
+  // TODO: Handle props drilling
+  // TODO: Turn object into Map to avoid duplicate keys
+  const variables = new ExtractedProps();
+  ts.forEachChild(sourceFile, (node) => getVariables({ node, sourceFile, range, checker, props: variables }));
 
   return Object.values(props.props);
 }
@@ -56,7 +64,7 @@ function visit(args: VisitorArguments) {
   ts.forEachChild(node, (node) => visit({ ...args, node }));
 }
 
-function getPropType(checker: ts.TypeChecker, prop: ts.JsxAttributeLike) {
+function getPropType(checker: ts.TypeChecker, prop: ts.Node) {
   return checker.typeToString(checker.getTypeAtLocation(prop));
 }
 
@@ -98,8 +106,61 @@ function isValueLiteral(attribute: ts.JsxAttribute, checker: ts.TypeChecker) {
     }
   }
 
-  // TODO: Handle template literals actually using interpolations
-  // TODO: handle other types of JsxExpression and expression types
-
   return false;
+}
+
+function getVariables(args: VisitorArguments) {
+  const { node, sourceFile, range, checker, props } = args;
+
+  // visiting node outside selection
+  const nodeRange = getNodeRange(node, sourceFile);
+  if (!range.intersection(nodeRange)) return;
+
+  // look for variables in nested nodes
+  ts.forEachChild(node, (node) => getVariables({ ...args, node }));
+
+  if (!ts.isIdentifier(node)) return;
+
+  // escapes from tag names
+  const invalidIdentifierParents = [
+    ts.SyntaxKind.JsxSelfClosingElement,
+    ts.SyntaxKind.JsxOpeningElement,
+    ts.SyntaxKind.JsxClosingElement,
+    ts.SyntaxKind.JsxFragment,
+    ts.SyntaxKind.JsxOpeningFragment,
+    ts.SyntaxKind.JsxClosingFragment,
+  ];
+  if (invalidIdentifierParents.includes(node.parent?.kind)) return;
+
+  // value is literal undefined
+  if (node.getText() === 'undefined') return;
+
+  // node does not reference a named entity
+  const symbol = checker.getSymbolAtLocation(node);
+  if (!symbol) return;
+
+  // no value is being declared
+  const valueDeclaration = symbol?.valueDeclaration;
+  if (!valueDeclaration) return;
+
+  // value is imported or is a global variable, and thus not bound to the function scope in which the selection is made
+  if (valueDeclaration.getSourceFile().fileName !== sourceFile.fileName) return;
+
+  // value is declared or is a parameter in the selection itself,
+  // e.g. <button onClick={(e) => { const target = e.target; doStuff(target); }} />
+  // "onClick" is a JSX Attribute, "e" is a parameter and "target" is a declaration in the selection, but not "doStuff".
+  const declarationRange = getNodeRange(valueDeclaration, sourceFile);
+  if (range.intersection(declarationRange)) return;
+
+  // value has a value declaration that should be passed as a prop
+  const newProp = {
+    name: node.getText(),
+    pair: node.getText(),
+    type: getPropType(checker, node),
+    range: getNodeRange(node, sourceFile),
+    isSpread: false,
+    isLiteral: false,
+  };
+
+  props.updateProps(newProp);
 }
