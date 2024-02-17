@@ -1,6 +1,6 @@
-import React, { ReactNode } from "react";
+import React from "react";
 
-function Child({ Header }: { Header: ReactNode }) {
+function Child({ Header }) {
   return (
     <div>
       {Header}
@@ -10,6 +10,12 @@ function Child({ Header }: { Header: ReactNode }) {
 }
 
 function Component() {
+  return (
+    <Extracted />
+  );
+}
+
+function Extracted() {
   return (
     <div>
       <Child Header={<header>Header</header>} />

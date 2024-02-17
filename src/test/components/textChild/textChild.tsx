@@ -1,11 +1,12 @@
-import React from 'react';
+import React from "react";
 
 function Component() {
-  const message = 'Text as Child';
+  const greeting: string = "Ça va? Ça va!";
 
   return (
     <div className="w-full">
-      <div>{message}</div>
+      <div>In French, a conversation can enter an infinite loop with: {greeting}</div>
+      <div>Be careful!</div>
     </div>
   );
 }

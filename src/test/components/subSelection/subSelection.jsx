@@ -1,6 +1,6 @@
-import React, { ComponentPropsWithRef, ReactNode } from "react";
+import React from "react";
 
-function ActuallySelectedComponent({ children, className }: { children: ReactNode } & ComponentPropsWithRef<"div">) {
+function ActuallySelectedComponent({ children, className }) {
   return <div className={className}>{children}</div>;
 }
 

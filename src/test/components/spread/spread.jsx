@@ -1,6 +1,6 @@
-import React, { ComponentPropsWithRef } from "react";
+import React from "react";
 
-function Component({ ...props }: ComponentPropsWithRef<"div">) {
+function Component({ ...props }) {
   const min = Math.floor(Math.random() * 100);
 
   return (

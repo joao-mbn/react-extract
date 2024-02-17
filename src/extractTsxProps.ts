@@ -12,6 +12,7 @@ export function extractTsxProps(document: vscode.TextDocument, range: vscode.Ran
   // TODO: Handle SpreadAssignment
   // TODO: Handle props that constants outside the function scope but inside the file
   // TODO: Handle props drilling
+  // TODO: Many types aren't inferred correctly see map and coalesce test cases.
   const props: Map<string, ExtractedProp> = new Map();
   ts.forEachChild(sourceFile, (node) => visit({ node, sourceFile, range, checker, props }));
 
