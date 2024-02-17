@@ -29,77 +29,41 @@ export async function buildExtractedComponent(
 
   const editor = await vscode.window.showTextDocument(document);
 
-  const referencedProps = props.filter((prop) => !prop.isLiteral);
-
-  let totalLineChange = 0;
-  const isSuccess = await editor.edit((editBuilder) => {
-    // Perform batch edit on the original selected text replacing the props with their reference (propAlias)
-    for (const { range, name, propAlias } of referencedProps) {
-      const originalLineCount = range.end.line - range.start.line + 1;
-      const updatedText = `${name}={${propAlias}}`;
-      const updatedLineCount = 1; // updatedText is always one line long
-      totalLineChange += updatedLineCount - originalLineCount;
-      editBuilder.replace(range, updatedText);
-    }
-  });
-
-  if (!isSuccess) return;
-
-  const newEndLine = range.end.line + totalLineChange;
-  const rangeAfterReplaces = new vscode.Range(range.start, new vscode.Position(newEndLine, range.end.character));
-
   await editor.edit((editBuilder) => {
-    const shouldDisplayInterface = isTypescript && referencedProps.length > 0;
+    const shouldDisplayInterface = isTypescript && props.length > 0;
 
     const interfaceName = `${componentName}Props`;
-    const interfaceDeclaration = `\n
+    const extractedComponentInterface = `\n
       interface ${interfaceName} {
-        ${referencedProps
-          .map((prop) => `${prop.propAlias}: ${prop.type}`)
+        ${props
+          .map(({ name, type }) => `${name}: ${type}`)
           .join(';\n')
           .concat(';')}
       }\n
     `;
 
-    const updatedSelectedText = `
-      ${shouldDisplayInterface ? interfaceDeclaration : ''}\n
+    const extractedComponent = `
+      ${shouldDisplayInterface ? extractedComponentInterface : ''}\n
 
       function ${componentName}(
-        ${referencedProps.length > 0 ? `{ ${referencedProps.map((e) => e.propAlias).join(',\n')} }` : ''}
+        ${props.length > 0 ? `{ ${props.map(({ name }) => name).join(',\n')} }` : ''}
         ${shouldDisplayInterface ? `: ${interfaceName}` : ''}
       ) {
         return (
-          ${document.getText(rangeAfterReplaces)}
+          ${document.getText(range)}
         );
       }
     `;
 
-    /**
-     * Insert the extracted component at the end of the document.
-     * Example:
-     * function Component({ propAlias }) {
-     *    return (
-     *      <div>
-     *         <Child1 prop={propAlias} />
-     *         <Child2 />
-     *      </div>
-     *    );
-     * }
-     */
     const lastLine = document.lineAt(document.lineCount - 1);
     const endOfDocument = new vscode.Position(lastLine.lineNumber, lastLine.text.length);
-    editBuilder.insert(endOfDocument, '\n' + updatedSelectedText);
+    editBuilder.insert(endOfDocument, '\n' + extractedComponent);
 
-    /**
-     * Replace the selected text with the component reference, where the original prop names are
-     * replaced with their reference (propAlias) in the extracted component, while the values are kept.
-     * Example: <Component propAlias={value} />
-     */
-    const componentReference = `
+    const extractedComponentReference = `
       <${componentName}
-        ${referencedProps.map((prop) => `${prop.pair.replace(/\w+(?==)/, prop.propAlias)}`).join('\n')}
+        ${props.map(({ name }) => `${name}={${name}}`).join('\n')}
       />
     `;
-    editBuilder.replace(rangeAfterReplaces, componentReference);
+    editBuilder.replace(range, extractedComponentReference);
   });
 }
