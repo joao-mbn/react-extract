@@ -64,6 +64,18 @@ function visit(args: VisitorArguments) {
   // value is imported or is a global variable, and thus not bound to the function scope in which the selection is made
   if (valueDeclaration.getSourceFile().fileName !== sourceFile.fileName) return;
 
+  // types of declarations that should be passed as props, by trial and error with TS AST.
+  const allowedDeclarationKinds = [
+    ts.SyntaxKind.BindingElement,
+    ts.SyntaxKind.Parameter,
+    ts.SyntaxKind.ShorthandPropertyAssignment,
+    ts.SyntaxKind.FunctionDeclaration,
+    ts.SyntaxKind.VariableDeclaration,
+    ts.SyntaxKind.PropertyDeclaration,
+    ts.SyntaxKind.MethodDeclaration,
+  ];
+  if (!allowedDeclarationKinds.includes(valueDeclaration.kind)) return;
+
   // value is declared or is a parameter in the selection itself,
   // e.g. <button onClick={(e) => { const target = e.target; doStuff(target); }} />
   // "onClick" is a JSX Attribute, "e" is a parameter and "target" is a declaration in the selection, but not "doStuff".

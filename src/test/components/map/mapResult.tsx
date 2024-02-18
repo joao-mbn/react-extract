@@ -23,7 +23,7 @@ function Component() {
 }
 
 interface ExtractedProps {
-  model: { label: string; value: string }[];
+  model: { label: string; value: string; }[];
 }
 
 function Extracted({ model }: ExtractedProps) {

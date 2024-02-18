@@ -248,4 +248,22 @@ suite('buildExtractedComponent', function () {
       assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
     });
   });
+
+  suite('extract a component with complex declarations', function () {
+    const componentName = 'Extracted';
+
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(27, 4), new vscode.Position(46, 10));
+      const { tsTest, tsResult } = await getDocuments('declaration');
+      await buildExtractedComponent(tsTest, range, componentName);
+      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+    });
+
+    test('with javascript', async function () {
+      const range = new vscode.Range(new vscode.Position(27, 4), new vscode.Position(46, 10));
+      const { jsTest, jsResult } = await getDocuments('declaration');
+      await buildExtractedComponent(jsTest, range, componentName);
+      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+    });
+  });
 });

@@ -10,7 +10,9 @@ function Component() {
     <div>
       <span>Child 1</span>
       <span className="child-2">Child 2</span>
-      <Extracted margin={margin} />
+      <Extracted
+        margin={margin}
+      />
     </div>
   );
 }
