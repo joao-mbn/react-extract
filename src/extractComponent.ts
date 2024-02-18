@@ -9,9 +9,6 @@ export async function extractComponent(document: vscode.TextDocument, range: vsc
     title: 'Give the extracted component a name',
   });
 
-  // TODO: Remove this console.log after getting the correct range for the test cases.
-  console.log(document.fileName, range.start.line, range.start.character, range.end.line, range.end.character);
-
   // If the user clears the input or cancels the input, it's implied that the user doesn't want to proceed.
   if (!componentName) return;
 

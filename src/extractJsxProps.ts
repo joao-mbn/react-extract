@@ -48,10 +48,6 @@ export function extractJsxProps(document: vscode.TextDocument, range: vscode.Ran
     },
   });
 
-  // TODO: Handle SpreadAssignment
-  // TODO: Handle props that constants outside the function scope but inside the file
-  // TODO: Handle props drilling
-
   return [...props.values()];
 }
 
