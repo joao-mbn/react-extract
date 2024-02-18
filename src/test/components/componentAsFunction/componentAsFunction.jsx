@@ -1,6 +1,6 @@
-import React, { ReactNode } from "react";
+import React from "react";
 
-function Child({ renderHeader }: { renderHeader: (title: string) => ReactNode }) {
+function Child({ renderHeader }) {
   return (
     <div>
       {renderHeader("Child" + Math.random().toFixed(2))}
@@ -10,12 +10,6 @@ function Child({ renderHeader }: { renderHeader: (title: string) => ReactNode })
 }
 
 function Component() {
-  return (
-    <Extracted />
-  );
-}
-
-function Extracted() {
   return (
     <div>
       <Child renderHeader={(title) => <header>{title}</header>} />

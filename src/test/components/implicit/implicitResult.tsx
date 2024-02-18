@@ -5,21 +5,21 @@ function Component() {
 
   return (
     <Extracted
-      disabled={isDisabled}
+      isDisabled={isDisabled}
     />
   );
 }
 
 interface ExtractedProps {
-  disabled: boolean;
+  isDisabled: boolean;
 }
 
-function Extracted({ disabled }: ExtractedProps) {
+function Extracted({ isDisabled }: ExtractedProps) {
   return (
     <form>
       <button disabled>Submit</button>
       <button disabled={false}>Do this</button>
-      <button disabled={disabled}>Do this</button>
+      <button disabled={isDisabled}>Do this</button>
       <button disabled={undefined}>Do this</button>
       <input disabled placeholder="Type here" />
     </form>

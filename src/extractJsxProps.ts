@@ -1,8 +1,7 @@
 import * as parser from '@babel/parser';
-import traverse, { NodePath } from '@babel/traverse';
-import { JSXAttribute, JSXOpeningElement } from '@babel/types';
+import traverse, { Node } from '@babel/traverse';
 import * as vscode from 'vscode';
-import { ExtractedProps } from './class';
+import { ExtractedProp } from './types';
 
 export function extractJsxProps(document: vscode.TextDocument, range: vscode.Range) {
   const selectedText = document.getText();
@@ -12,71 +11,58 @@ export function extractJsxProps(document: vscode.TextDocument, range: vscode.Ran
     plugins: ['jsx'],
   });
 
-  const props = new ExtractedProps();
+  const props: Map<string, ExtractedProp> = new Map();
 
   traverse(ast, {
-    JSXOpeningElement(path) {
-      for (const attribute of path.node.attributes) {
-        if (attribute.type !== 'JSXAttribute' && attribute.type !== 'JSXSpreadAttribute') continue;
-        if (!attribute.loc) continue;
+    Identifier(path) {
+      const node = path.node;
 
-        const range = new vscode.Range(
-          attribute.loc.start.line - 1,
-          attribute.loc.start.column,
-          attribute.loc.end.line - 1,
-          attribute.loc.end.column
-        );
-        const pair = document.getText(range);
-        const name = pair.match(/\w+(?==)/)?.[0] || '';
+      // visiting node outside selection
+      const nodeRange = getNodeRange(node);
+      if (!nodeRange || !range.intersection(nodeRange)) return;
 
-        const newProp = { pair, name, range, type: 'irrelevant' };
+      // value is literal undefined
+      if (node.name === 'undefined') return;
 
-        if (attribute.type === 'JSXAttribute') {
-          const isStatic = isValueLiteral(attribute, path);
+      // node does not reference a named entity
+      const binding = path.scope.getBinding(node.name);
+      if (!binding) return;
 
-          props.updateProps({ ...newProp, isSpread: false, isLiteral: isStatic });
-        } else {
-          props.updateProps({ ...newProp, isSpread: true, isLiteral: false });
-        }
-      }
+      // value is imported or is a global variable, and thus not bound to the function scope in which the selection is made
+      if (binding.path.type === 'ImportSpecifier') return;
+
+      // value is declared or is a parameter in the selection itself,
+      // e.g. <button onClick={(e) => { const target = e.target; doStuff(target); }} />
+      // "e" is a parameter and "target" is a declaration in the selection, but not "doStuff".
+      const declarationRange = getNodeRange(binding.path.node);
+      if (declarationRange && range.intersection(declarationRange)) return;
+
+      // value has a value declaration that should be passed as a prop
+      const newProp = {
+        name: node.name,
+        type: '',
+        isSpread: false,
+      };
+
+      props.set(newProp.name, newProp);
     },
   });
 
-  return Object.values(props.props);
+  // TODO: Handle SpreadAssignment
+  // TODO: Handle props that constants outside the function scope but inside the file
+  // TODO: Handle props drilling
+
+  return [...props.values()];
 }
 
-function isValueLiteral(attribute: JSXAttribute, path: NodePath<JSXOpeningElement>) {
-  // prop [implicitly true]
-  if (!attribute.value) return true;
+function getNodeRange(node: Node) {
+  if (!node.loc) return;
 
-  // prop="value"
-  if (attribute.value.type === 'StringLiteral') {
-    return true;
-  }
-
-  // prop={value}
-  if (attribute.value?.type === 'JSXExpressionContainer') {
-    const expression = attribute.value.expression;
-
-    // null | true | false | string | number | regex passed as literals
-    if (expression.type.toString().includes('Literal')) {
-      return expression.type === 'TemplateLiteral' ? expression.expressions.length === 0 : true;
-    }
-
-    if (expression.type === 'Identifier') {
-      // undefined literal
-      if (expression.name === 'undefined') return true;
-
-      const binding = path.scope.getBinding(expression.name);
-      if (!binding) return true;
-
-      // imported variables passed as is are considered static
-      return binding.path.type === 'ImportSpecifier';
-    }
-  }
-
-  // TODO: Handle template literals actually using interpolations
-  // TODO: handle other types of JSXExpressionContainer and expression types
-
-  return false;
+  const range = new vscode.Range(
+    node.loc.start.line - 1,
+    node.loc.start.column,
+    node.loc.end.line - 1,
+    node.loc.end.column
+  );
+  return range;
 }

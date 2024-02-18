@@ -1,2 +1,2 @@
 export const VALUE = 42;
-export const CLASS_NAME = 'class';
+export const CLASS_NAME = "class";

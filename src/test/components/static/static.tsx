@@ -2,7 +2,7 @@ import React from "react";
 import { CLASS_NAME, VALUE } from "./export";
 
 function Component() {
-  const baseClass = "my-class-2";
+  const baseClass: string = "my-class-2";
   return (
     <div className={baseClass} style={{ color: "red" }}>
       <div className="my-class" onClick={() => console.log("Clicked!")}>

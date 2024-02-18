@@ -1,6 +1,6 @@
-import React, { ComponentPropsWithRef, ReactNode } from "react";
+import React from "react";
 
-function ActuallySelectedComponent({ children, className }: { children: ReactNode } & ComponentPropsWithRef<"div">) {
+function ActuallySelectedComponent({ children, className }) {
   return <div className={className}>{children}</div>;
 }
 
@@ -17,11 +17,7 @@ function Component() {
   );
 }
 
-interface ExtractedProps {
-  margin: string;
-}
-
-function Extracted({ margin }: ExtractedProps) {
+function Extracted({ margin }) {
   return (
     <ActuallySelectedComponent className={margin} onClick={() => console.log("Hello")}>
       <span>Child 3</span>
