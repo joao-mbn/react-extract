@@ -26,14 +26,14 @@ function Component(props: any) {
 
   return (
     <Extracted
-      model={model}
-      explicit={explicit}
-      testFunction={testFunction}
       bindingElement={bindingElement}
       bindingElementDestructure={bindingElementDestructure}
-      props={props}
+      explicit={explicit}
+      model={model}
       myClass={myClass}
+      props={props}
       shortHand={shortHand}
+      testFunction={testFunction}
     />
   );
 }

@@ -25,7 +25,9 @@ export async function buildExtractedComponent(
 ) {
   const isTypescript = isFileTypescript(document);
 
-  const props = isTypescript ? extractTsxProps(document, range) : extractJsxProps(document, range);
+  const props = (isTypescript ? extractTsxProps(document, range) : extractJsxProps(document, range)).sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
 
   const editor = await vscode.window.showTextDocument(document);
 

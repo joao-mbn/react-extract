@@ -164,14 +164,14 @@ suite('buildExtractedComponent', function () {
 
     test('with typescript', async function () {
       const range = new vscode.Range(new vscode.Position(13, 4), new vscode.Position(16, 10));
-      const { tsTest, tsResult } = await getDocuments('componentAsFunction');
+      const { tsTest, tsResult } = await getDocuments('componentAsProps');
       await buildExtractedComponent(tsTest, range, componentName);
       assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(13, 4), new vscode.Position(16, 10));
-      const { jsTest, jsResult } = await getDocuments('componentAsFunction');
+      const { jsTest, jsResult } = await getDocuments('componentAsProps');
       await buildExtractedComponent(jsTest, range, componentName);
       assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
     });
