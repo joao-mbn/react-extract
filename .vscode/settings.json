@@ -9,7 +9,6 @@
     "dist": true // set this to false to include "dist" folder in search results
   },
   "typescript.tsc.autoDetect": "off", // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
-  "editor.fontLigatures": false, // This projects uses a lot of regex and ligatures can make it hard to read
   "typescript.format.semicolons": "insert",
   "editor.tabSize": 2,
   "[typescript]": {
@@ -22,4 +21,3 @@
   "editor.formatOnSave": true,
   "prettier.ignorePath": ".prettierignore"
 }
-
