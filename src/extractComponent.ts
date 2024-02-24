@@ -24,7 +24,13 @@ export async function extractComponent(document: vscode.TextDocument, range: vsc
 
 export async function buildExtractedComponent(args: ExtractionArgs) {
   const { document, range, componentName, isTypescript } = args;
-  const props = extractProps(args).sort((a, b) => a.name.localeCompare(b.name));
+  const props = extractProps(args).sort((a, b) => {
+    if (a.isSpread) return 1;
+    if (b.isSpread) return -1;
+
+    return a.name.localeCompare(b.name);
+  });
+  const hasSingleSpread = props.filter((prop) => prop.isSpread).length === 1;
 
   const editor = await vscode.window.showTextDocument(document);
 
@@ -33,8 +39,9 @@ export async function buildExtractedComponent(args: ExtractionArgs) {
 
     const interfaceName = `${componentName}Props`;
     const extractedComponentInterface = `\n
-      interface ${interfaceName} {
+      interface ${interfaceName} ${hasSingleSpread ? `extends ${props.find((prop) => prop.isSpread)?.type ?? 'any'}` : ''} {
         ${props
+          .filter(({ isSpread }) => !hasSingleSpread || (hasSingleSpread && !isSpread))
           .map(({ name, type }) => `${name}: ${type}`)
           .join(';\n')
           .concat(';')}
@@ -45,7 +52,7 @@ export async function buildExtractedComponent(args: ExtractionArgs) {
       ${shouldDisplayInterface ? extractedComponentInterface : ''}\n
 
       function ${componentName}(
-        ${props.length > 0 ? `{ ${props.map(({ name }) => name).join(',\n')} }` : ''}
+        ${props.length > 0 ? `{ ${props.map(({ name, isSpread }) => (isSpread && hasSingleSpread ? `...${name}` : name)).join(',\n')} }` : ''}
         ${shouldDisplayInterface ? `: ${interfaceName}` : ''}
       ) {
         return (
@@ -60,7 +67,7 @@ export async function buildExtractedComponent(args: ExtractionArgs) {
 
     const extractedComponentReference = `
       <${componentName}
-        ${props.map(({ name }) => `${name}={${name}}`).join('\n')}
+        ${props.map(({ name, isSpread }) => (isSpread && hasSingleSpread ? `{...${name}}` : `${name}={${name}}`)).join('\n')}
       />
     `;
     editBuilder.replace(range, extractedComponentReference);

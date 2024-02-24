@@ -79,18 +79,16 @@ function visit(args: VisitorArguments) {
   const declarationRange = getNodeRange(valueDeclaration, sourceFile);
   if (range.intersection(declarationRange)) return;
 
+  const type = checker.getTypeAtLocation(node);
+
   // value has a value declaration that should be passed as a prop
   const newProp = {
     name: node.getText(),
-    type: getPropType(checker, node),
-    isSpread: false,
+    type: checker.typeToString(type, node),
+    isSpread: node.parent?.kind === ts.SyntaxKind.JsxSpreadAttribute,
   };
 
   props.set(newProp.name, newProp);
-}
-
-function getPropType(checker: ts.TypeChecker, prop: ts.Node) {
-  return checker.typeToString(checker.getTypeAtLocation(prop));
 }
 
 function getNodeRange(node: ts.Node, sourceFile: ts.SourceFile) {
