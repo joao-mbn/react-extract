@@ -1,24 +1,25 @@
 import ts from 'typescript';
 import * as vscode from 'vscode';
-import { ExtractedProp } from './types';
+import { ExtractedProp, ExtractionArgs } from './types';
 
-export function extractTsxProps(document: vscode.TextDocument, range: vscode.Range) {
-  const program = ts.createProgram([document.uri.fsPath], {});
+export function extractProps(args: ExtractionArgs) {
+  const { document } = args;
+
+  const program = ts.createProgram([document.uri.fsPath], { allowJs: true });
   const checker = program.getTypeChecker();
 
   const sourceFile = program.getSourceFile(document.uri.fsPath);
   if (!sourceFile) return [];
 
   const props: Map<string, ExtractedProp> = new Map();
-  ts.forEachChild(sourceFile, (node) => visit({ node, sourceFile, range, checker, props }));
+  ts.forEachChild(sourceFile, (node) => visit({ node, sourceFile, checker, props, ...args }));
 
   return [...props.values()];
 }
 
-interface VisitorArguments {
+interface VisitorArguments extends ExtractionArgs {
   node: ts.Node;
   sourceFile: ts.SourceFile;
-  range: vscode.Range;
   checker: ts.TypeChecker;
   props: Map<string, ExtractedProp>;
 }

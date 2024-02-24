@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { isFileTypescript } from './checks';
-import { extractJsxProps } from './extractJsxProps';
-import { extractTsxProps } from './extractTsxProps';
+import { extractProps } from './extractProps';
+import { ExtractionArgs } from './types';
 
 export async function extractComponent(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
   const componentName = await vscode.window.showInputBox({
@@ -12,19 +12,19 @@ export async function extractComponent(document: vscode.TextDocument, range: vsc
   // If the user clears the input or cancels the input, it's implied that the user doesn't want to proceed.
   if (!componentName) return;
 
-  await buildExtractedComponent(document, range, componentName);
+  const args: ExtractionArgs = {
+    document,
+    range,
+    componentName,
+    isTypescript: isFileTypescript(document),
+  };
+
+  await buildExtractedComponent(args);
 }
 
-export async function buildExtractedComponent(
-  document: vscode.TextDocument,
-  range: vscode.Range,
-  componentName: string
-) {
-  const isTypescript = isFileTypescript(document);
-
-  const props = (isTypescript ? extractTsxProps(document, range) : extractJsxProps(document, range)).sort((a, b) =>
-    a.name.localeCompare(b.name)
-  );
+export async function buildExtractedComponent(args: ExtractionArgs) {
+  const { document, range, componentName, isTypescript } = args;
+  const props = extractProps(args).sort((a, b) => a.name.localeCompare(b.name));
 
   const editor = await vscode.window.showTextDocument(document);
 
