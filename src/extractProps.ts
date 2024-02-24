@@ -5,7 +5,7 @@ import { ExtractedProp, ExtractionArgs } from './types';
 export function extractProps(args: ExtractionArgs) {
   const { document } = args;
 
-  const program = ts.createProgram([document.uri.fsPath], { allowJs: true });
+  const program = ts.createProgram([document.uri.fsPath], { allowJs: true, strict: true });
   const checker = program.getTypeChecker();
 
   const sourceFile = program.getSourceFile(document.uri.fsPath);
