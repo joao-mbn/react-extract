@@ -53,8 +53,6 @@
   "devDependencies": {
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
-    "@types/react": "^18.2.55",
-    "@types/react-dom": "^18.2.19",
     "@types/vscode": "^1.86.0",
     "@typescript-eslint/eslint-plugin": "^6.19.1",
     "@typescript-eslint/parser": "^6.19.1",
@@ -63,8 +61,6 @@
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.2.5",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "ts-loader": "^9.5.1",
     "webpack": "^5.90.0",
     "webpack-cli": "^5.1.4"
