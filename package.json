@@ -1,7 +1,7 @@
 {
   "name": "react-extract",
   "displayName": "React Extract",
-  "description": "Extract a valid piece of JSX code into a new function, automatically passing the props and building the extracted component interface, if using Typescript.",
+  "description": "Extract a valid piece of JSX code into a new function, passing props and creating its interface.",
   "publisher": "joao-mbn",
   "version": "0.0.1",
   "repository": {
