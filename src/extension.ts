@@ -12,11 +12,11 @@ class ExtractOnRefactorProvider implements vscode.CodeActionProvider {
       return [];
     }
 
-    const refactor = new vscode.CodeAction('Extract Component', vscode.CodeActionKind.Refactor);
+    const refactor = new vscode.CodeAction('React Extract: Extract Component', vscode.CodeActionKind.Refactor);
 
     refactor.command = {
-      command: 'extract.extractComponent',
-      title: 'Extract Component',
+      command: 'reactExtract.extractComponent',
+      title: 'React Extract: Extract Component',
       arguments: [document, range],
     };
 
@@ -35,7 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  context.subscriptions.push(vscode.commands.registerCommand('extract.extractComponent', extractComponent));
+  context.subscriptions.push(vscode.commands.registerCommand('reactExtract.extractComponent', extractComponent));
 }
 
 export function deactivate() {}

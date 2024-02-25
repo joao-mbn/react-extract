@@ -1,12 +1,12 @@
 {
-  "name": "extract",
-  "displayName": "Extract",
-  "description": "Extract components from your JSX",
+  "name": "react-extract",
+  "displayName": "React Extract",
+  "description": "Extract a valid piece of JSX code into a new function, automatically passing the props and building the extracted component interface, if using Typescript.",
   "publisher": "joao-mbn",
   "version": "0.0.1",
   "repository": {
     "type": "git",
-    "url": "https://github.com/joao-mbn/extract"
+    "url": "https://github.com/joao-mbn/react-extract"
   },
   "engines": {
     "vscode": "^1.86.0"
@@ -24,14 +24,14 @@
   "contributes": {
     "commands": [
       {
-        "command": "extract.extractComponent",
-        "title": "Extract Component"
+        "command": "reactExtract.extractComponent",
+        "title": "React Extract: Extract Component"
       }
     ],
     "menus": {
       "commandPalette": [
         {
-          "command": "extract.extractComponent",
+          "command": "reactExtract.extractComponent",
           "when": "false"
         }
       ]

@@ -1,7 +1,7 @@
 # VS Code React Extract
 
 <p align="center">
-  <img src="./assets/logo.svg" alt="extension-logo" />
+  <img src="./assets/logo.png" alt="extension-logo" />
 </p>
 
 This extension for Visual Studio Code provides a quick way to refactor your React code. It allows you to extract a valid piece of component code into a new function, automatically passing the props and building the extracted component interface, if using Typescript.
@@ -35,8 +35,8 @@ If you encounter any problems or have suggestions for improvements, please open 
 Clone the repo, install dependencies and enter VS Code.
 
 ```sh
-$ https://github.com/joao-mbn/extract.git
-$ cd extract
+$ https://github.com/joao-mbn/react-extract.git
+$ cd react-extract
 $ npm i
 $ code .
 ```
