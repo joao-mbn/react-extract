@@ -1,9 +1,7 @@
-import React from "react";
+import React from 'react';
 
 function Component() {
-  return (
-    <Extracted />
-  );
+  return <Extracted />;
 }
 
 function Extracted() {

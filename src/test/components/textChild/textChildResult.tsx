@@ -1,13 +1,9 @@
-import React from "react";
+import React from 'react';
 
 function Component() {
-  const greeting: string = "Ça va? Ça va!";
+  const greeting: string = 'Ça va? Ça va!';
 
-  return (
-    <Extracted
-      greeting={greeting}
-    />
-  );
+  return <Extracted greeting={greeting} />;
 }
 
 interface ExtractedProps {
@@ -16,7 +12,7 @@ interface ExtractedProps {
 
 function Extracted({ greeting }: ExtractedProps) {
   return (
-    <div className="w-full">
+    <div className='w-full'>
       <div>In French, a conversation can enter an infinite loop with: {greeting}</div>
       <div>Be careful!</div>
     </div>

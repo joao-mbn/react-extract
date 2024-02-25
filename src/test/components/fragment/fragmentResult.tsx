@@ -1,15 +1,13 @@
-import React from "react";
+import React from 'react';
 
 function Component() {
-  return (
-    <Extracted />
-  );
+  return <Extracted />;
 }
 
 function Extracted() {
   return (
     <>
-      <div className="text-sm"></div>
+      <div className='text-sm'></div>
       <button disabled />
       <>
         <div>Test</div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 function Child({ Header }) {
   return (
@@ -10,9 +10,7 @@ function Child({ Header }) {
 }
 
 function Component() {
-  return (
-    <Extracted />
-  );
+  return <Extracted />;
 }
 
 function Extracted() {

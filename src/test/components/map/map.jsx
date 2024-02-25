@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 function Child({ model }) {
   return (
@@ -12,8 +12,8 @@ function Child({ model }) {
 
 function Component() {
   const model = [
-    { label: "label1", value: "value1" },
-    { label: "label2", value: "value2" },
+    { label: 'label1', value: 'value1' },
+    { label: 'label2', value: 'value2' },
   ];
   return (
     <>

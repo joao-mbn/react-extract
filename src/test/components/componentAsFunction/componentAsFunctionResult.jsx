@@ -1,18 +1,16 @@
-import React from "react";
+import React from 'react';
 
 function Child({ renderHeader }) {
   return (
     <div>
-      {renderHeader("Child" + Math.random().toFixed(2))}
+      {renderHeader('Child' + Math.random().toFixed(2))}
       <h1>Not a Footer</h1>
     </div>
   );
 }
 
 function Component() {
-  return (
-    <Extracted />
-  );
+  return <Extracted />;
 }
 
 function Extracted() {

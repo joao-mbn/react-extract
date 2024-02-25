@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode } from 'react';
 
 function Child({ Header }: { Header: ReactNode }) {
   return (
@@ -10,9 +10,7 @@ function Child({ Header }: { Header: ReactNode }) {
 }
 
 function Component() {
-  return (
-    <Extracted />
-  );
+  return <Extracted />;
 }
 
 function Extracted() {

@@ -1,27 +1,27 @@
-import React from "react";
+import React from 'react';
 
 class MyClass {
   myProperty = 'hello';
-  myMethod () {
-    return 'world'
+  myMethod() {
+    return 'world';
   }
 }
 
-function Child (props: any) {
-  return <div>{props}</div>
+function Child(props: any) {
+  return <div>{props}</div>;
 }
 
 function Component(props: any) {
-  const explicit = "label";
-  const shortHand = "shortHand";
+  const explicit = 'label';
+  const shortHand = 'shortHand';
   const model = [
-    { label: "label1", value: "value1", shortHand: '' },
-    { label: "label2", value: "value2", shortHand: '' },
+    { label: 'label1', value: 'value1', shortHand: '' },
+    { label: 'label2', value: 'value2', shortHand: '' },
   ];
   const { bindingElement, ...bindingElementDestructure } = props;
   const myClass = new MyClass();
   function testFunction() {
-    return "test"
+    return 'test';
   }
 
   return (
