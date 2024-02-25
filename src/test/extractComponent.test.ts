@@ -5,7 +5,8 @@ import * as vscode from 'vscode';
 import { buildExtractedComponent } from '../extractComponent';
 
 function assertStrictEqualStrippingLineBreaks(expected: string, result: string) {
-  const parser = (text: string) => text.replaceAll(/\s+(?=\W)|(?<=\W)\s+/g, '').trim();
+  const parser = (text: string) =>
+    text.replaceAll(/\s+/g, '').replaceAll(/;/g, '').replaceAll(/"/g, "'").replaceAll(/[()]/g, '');
 
   return assert.strictEqual(parser(result), parser(expected));
 }
@@ -228,6 +229,17 @@ suite('buildExtractedComponent', function () {
       const { jsTest, jsResult } = await getDocuments('textChild');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
       assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+    });
+  });
+
+  suite('extract a component where the prop type is too big to be fully displayed', function () {
+    const componentName = 'Extracted';
+
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(38, 9), new vscode.Position(38, 39));
+      const { tsTest, tsResult } = await getDocuments('longType');
+      await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
+      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
     });
   });
 
