@@ -8,7 +8,7 @@ This extension for Visual Studio Code provides a quick way to refactor your Reac
 
 ## Installation
 
-[Get it at Visual Studio Code Marketplace: React Extract](link)
+[Get it at Visual Studio Code Marketplace: React Extract](https://marketplace.visualstudio.com/items?itemName=joao-mbn.react-extract)
 
 ## Features
 
