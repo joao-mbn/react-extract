@@ -213,6 +213,24 @@ suite('buildExtractedComponent', function () {
     });
   });
 
+  suite('extract a component using multiple spread syntax inside the selection', function () {
+    const componentName = 'Extracted';
+
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(8, 4), new vscode.Position(12, 10));
+      const { tsTest, tsResult } = await getDocuments('spreadMany');
+      await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
+      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+    });
+
+    test('with javascript', async function () {
+      const range = new vscode.Range(new vscode.Position(8, 4), new vscode.Position(12, 10));
+      const { jsTest, jsResult } = await getDocuments('spreadMany');
+      await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
+      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+    });
+  });
+
   suite('extract a component that only a part of the component tree of the place it got extracted from', function () {
     const componentName = 'Extracted';
 
