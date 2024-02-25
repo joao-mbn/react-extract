@@ -195,42 +195,6 @@ suite('buildExtractedComponent', function () {
     });
   });
 
-  suite('extract a component using spread syntax', function () {
-    const componentName = 'Extracted';
-
-    test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(9, 10));
-      const { tsTest, tsResult } = await getDocuments('spread');
-      await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
-    });
-
-    test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(9, 10));
-      const { jsTest, jsResult } = await getDocuments('spread');
-      await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
-    });
-  });
-
-  suite('extract a component using multiple spread syntax inside the selection', function () {
-    const componentName = 'Extracted';
-
-    test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(8, 4), new vscode.Position(12, 10));
-      const { tsTest, tsResult } = await getDocuments('spreadMany');
-      await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
-    });
-
-    test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(8, 4), new vscode.Position(12, 10));
-      const { jsTest, jsResult } = await getDocuments('spreadMany');
-      await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
-    });
-  });
-
   suite('extract a component that only a part of the component tree of the place it got extracted from', function () {
     const componentName = 'Extracted';
 
@@ -267,21 +231,59 @@ suite('buildExtractedComponent', function () {
     });
   });
 
-  suite('extract a component with complex declarations', function () {
-    const componentName = 'Extracted';
+  suite('failling tests', function () {
+    suite('extract a component using spread syntax', function () {
+      const componentName = 'Extracted';
 
-    test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(27, 4), new vscode.Position(46, 10));
-      const { tsTest, tsResult } = await getDocuments('declaration');
-      await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      test('with typescript', async function () {
+        const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(9, 10));
+        const { tsTest, tsResult } = await getDocuments('spread');
+        await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
+        assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      });
+
+      test('with javascript', async function () {
+        const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(9, 10));
+        const { jsTest, jsResult } = await getDocuments('spread');
+        await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
+        assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      });
     });
 
-    test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(27, 4), new vscode.Position(46, 10));
-      const { jsTest, jsResult } = await getDocuments('declaration');
-      await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+    suite('extract a component using multiple spread syntax inside the selection', function () {
+      const componentName = 'Extracted';
+
+      test('with typescript', async function () {
+        const range = new vscode.Range(new vscode.Position(17, 4), new vscode.Position(24, 10));
+        const { tsTest, tsResult } = await getDocuments('spreadMany');
+        await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
+        assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      });
+
+      test('with javascript', async function () {
+        const range = new vscode.Range(new vscode.Position(17, 4), new vscode.Position(24, 10));
+        const { jsTest, jsResult } = await getDocuments('spreadMany');
+        await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
+        assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      });
+    });
+
+    suite('extract a component with complex declarations', function () {
+      const componentName = 'Extracted';
+
+      test('with typescript', async function () {
+        const range = new vscode.Range(new vscode.Position(27, 4), new vscode.Position(46, 10));
+        const { tsTest, tsResult } = await getDocuments('declaration');
+        await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
+        assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      });
+
+      test('with javascript', async function () {
+        const range = new vscode.Range(new vscode.Position(27, 4), new vscode.Position(46, 10));
+        const { jsTest, jsResult } = await getDocuments('declaration');
+        await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
+        assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      });
     });
   });
 });

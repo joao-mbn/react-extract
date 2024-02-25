@@ -7,6 +7,5 @@
     "sourceMap": true,
     "rootDir": "src",
     "strict": true
-  },
-  "exclude": ["./src/test/components/**/*"]
+  }
 }
