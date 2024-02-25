@@ -1,15 +1,27 @@
-import React from "react";
+import React from 'react';
 
 function Component({ onClick, ...props }) {
-  const min = Math.floor(Math.random() * 100);
-  const inputProps = { min, max: 20, onChange: () => {} }
-  const spanProps = { children: "Text", className: "bg-red-500" }
+  const {
+    min,
+    max: maximum,
+    ...inputProps
+  } = {
+    min: Math.floor(Math.random() * 100),
+    max: 20,
+    onChange: () => {},
+    className: 'bg-red-200',
+  };
+  const spanProps = { children: 'Text', className: 'bg-red-500' };
+  const buttonProps = { onClick: () => {}, className: 'bg-red-300' };
 
   return (
-    <div className="w-full">
-      <div onClick={onClick} {...props}>Another Test</div>
-      <input {...inputProps}/>
+    <div className='w-full'>
+      <div onClick={onClick} {...props}>
+        Another Test
+      </div>
+      <input min={min} max={maximum} {...inputProps} />
       <span {...spanProps}></span>
+      <button {...buttonProps}></button>
     </div>
   );
 }
