@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+## [0.2.0] - 2024-02-25
+
+### Added
+
+- Extension Icon
+
 ## [0.1.0] - 2024-02-25
 
 ### Added

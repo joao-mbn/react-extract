@@ -1,6 +1,5 @@
 .vscode/**
 .vscode-test/**
-assets/**
 node_modules/**
 src/**
 out/**
@@ -14,3 +13,8 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
+assets/extension-demo.gif
+assets/logo.png
+assets/logo.svg
+assets/logo-square.svg
+
