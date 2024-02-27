@@ -6,7 +6,7 @@ import { ExtractionArgs } from './types';
 export async function extractComponent(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
   const componentName = await vscode.window.showInputBox({
     value: 'Component',
-    title: 'Give the extracted component a name',
+    title: 'Give the extracted component a name'
   });
 
   // If the user clears the input or cancels the input, it's implied that the user doesn't want to proceed.
@@ -16,7 +16,7 @@ export async function extractComponent(document: vscode.TextDocument, range: vsc
     document,
     range,
     componentName,
-    isTypescript: isFileTypescript(document),
+    isTypescript: isFileTypescript(document)
   };
 
   await buildExtractedComponent(args);

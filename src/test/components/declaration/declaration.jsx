@@ -16,7 +16,7 @@ function Component(props) {
   const shortHand = 'shortHand';
   const model = [
     { label: 'label1', value: 'value1', shortHand: '' },
-    { label: 'label2', value: 'value2', shortHand: '' },
+    { label: 'label2', value: 'value2', shortHand: '' }
   ];
   const { bindingElement, ...bindingElementDestructure } = props;
   const myClass = new MyClass();

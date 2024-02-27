@@ -24,7 +24,7 @@ async function getDocuments(folder: string) {
     tsResultFilePath && vscode.workspace.openTextDocument(path.join(filePath, tsResultFilePath)),
     tsTestFilePath && vscode.workspace.openTextDocument(path.join(filePath, tsTestFilePath)),
     jsResultFilePath && vscode.workspace.openTextDocument(path.join(filePath, jsResultFilePath)),
-    jsTestFilePath && vscode.workspace.openTextDocument(path.join(filePath, jsTestFilePath)),
+    jsTestFilePath && vscode.workspace.openTextDocument(path.join(filePath, jsTestFilePath))
   ]);
 
   return { tsResult, tsTest, jsResult, jsTest } as Record<
@@ -227,6 +227,24 @@ suite('buildExtractedComponent', function () {
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(9, 10));
       const { jsTest, jsResult } = await getDocuments('textChild');
+      await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
+      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+    });
+  });
+
+  suite('extract a component with short-hand properties', function () {
+    const componentName = 'Extracted';
+
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(15, 4), new vscode.Position(18, 6));
+      const { tsTest, tsResult } = await getDocuments('shortHand');
+      await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
+      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+    });
+
+    test('with javascript', async function () {
+      const range = new vscode.Range(new vscode.Position(15, 4), new vscode.Position(18, 6));
+      const { jsTest, jsResult } = await getDocuments('shortHand');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
       assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
     });

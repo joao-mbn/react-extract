@@ -17,7 +17,7 @@ class ExtractOnRefactorProvider implements vscode.CodeActionProvider {
     refactor.command = {
       command: 'reactExtract.extractComponent',
       title: 'React Extract: Extract Component',
-      arguments: [document, range],
+      arguments: [document, range]
     };
 
     return [refactor];
@@ -30,7 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
       [{ pattern: '{**/*.js,**/*.ts,**/*.jsx,**/*.tsx}' }],
       new ExtractOnRefactorProvider(),
       {
-        providedCodeActionKinds: [vscode.CodeActionKind.Refactor],
+        providedCodeActionKinds: [vscode.CodeActionKind.Refactor]
       }
     )
   );

@@ -43,7 +43,7 @@ function visit(args: VisitorArguments) {
     ts.SyntaxKind.JsxClosingElement,
     ts.SyntaxKind.JsxFragment,
     ts.SyntaxKind.JsxOpeningFragment,
-    ts.SyntaxKind.JsxClosingFragment,
+    ts.SyntaxKind.JsxClosingFragment
   ];
   if (invalidIdentifierParents.includes(node.parent?.kind)) return;
 
@@ -69,21 +69,24 @@ function visit(args: VisitorArguments) {
     ts.SyntaxKind.FunctionDeclaration,
     ts.SyntaxKind.VariableDeclaration,
     ts.SyntaxKind.PropertyDeclaration,
-    ts.SyntaxKind.MethodDeclaration,
+    ts.SyntaxKind.MethodDeclaration
   ];
   if (!allowedDeclarationKinds.includes(valueDeclaration.kind)) return;
 
   // value is declared or is a parameter in the selection itself,
   // e.g. <button onClick={(e) => { const target = e.target; doStuff(target); }} />
   // "onClick" is a JSX Attribute, "e" is a parameter and "target" is a declaration in the selection, but not "doStuff".
+  // shorthand assignments are exceptions, as declaration and reference occupy the same range.
   const declarationRange = getNodeRange(valueDeclaration, sourceFile);
-  if (range.intersection(declarationRange)) return;
+  if (range.intersection(declarationRange) && valueDeclaration.kind !== ts.SyntaxKind.ShorthandPropertyAssignment) {
+    return;
+  }
 
   // value has a value declaration that should be passed as a prop
   const newProp = {
     name: node.getText(),
     type: getNodeTypeString(node, checker),
-    isSpread: node.parent?.kind === ts.SyntaxKind.JsxSpreadAttribute,
+    isSpread: node.parent?.kind === ts.SyntaxKind.JsxSpreadAttribute
   };
 
   props.set(newProp.name, newProp);

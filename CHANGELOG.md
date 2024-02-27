@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+## [0.2.1] - 2024-02-26
+
+### Fixed
+
+- Props passed as short-hand assignments not being extracted into new component
+
 ## [0.2.0] - 2024-02-25
 
 ### Added

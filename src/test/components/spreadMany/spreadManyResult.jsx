@@ -9,7 +9,7 @@ function Component({ onClick, ...props }) {
     min: Math.floor(Math.random() * 100),
     max: 20,
     onChange: () => {},
-    className: 'bg-red-200',
+    className: 'bg-red-200'
   };
   const spanProps = { children: 'Text', className: 'bg-red-500' };
   const buttonProps = { onClick: () => {}, className: 'bg-red-300' };
