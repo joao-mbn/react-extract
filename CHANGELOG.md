@@ -6,11 +6,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+## [0.3.1] - 2024-02-28
+
+### Fixed
+
+- Passing methods and properties of class instances
+
 ## [0.3.0] - 2024-02-27
 
 ### Added
 
-- Input treatment to the name given to the component.
+- Input treatment to the name given to the component
 
 ## [0.2.1] - 2024-02-26
 

@@ -261,6 +261,24 @@ suite('buildExtractedComponent', function () {
     });
   });
 
+  suite('extract a component with complex pattern of properties and methods passed as props', function () {
+    const componentName = 'Extracted';
+
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(21, 4), new vscode.Position(28, 6));
+      const { tsTest, tsResult } = await getDocuments('propertiesAndMethods');
+      await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
+      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+    });
+
+    test('with javascript', async function () {
+      const range = new vscode.Range(new vscode.Position(21, 4), new vscode.Position(28, 6));
+      const { jsTest, jsResult } = await getDocuments('propertiesAndMethods');
+      await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
+      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+    });
+  });
+
   suite('failling tests', function () {
     suite('extract a component using spread syntax', function () {
       const componentName = 'Extracted';

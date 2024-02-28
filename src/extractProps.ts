@@ -67,9 +67,7 @@ function visit(args: VisitorArguments) {
     ts.SyntaxKind.Parameter,
     ts.SyntaxKind.ShorthandPropertyAssignment,
     ts.SyntaxKind.FunctionDeclaration,
-    ts.SyntaxKind.VariableDeclaration,
-    ts.SyntaxKind.PropertyDeclaration,
-    ts.SyntaxKind.MethodDeclaration
+    ts.SyntaxKind.VariableDeclaration
   ];
   if (!allowedDeclarationKinds.includes(valueDeclaration.kind)) return;
 

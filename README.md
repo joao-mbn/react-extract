@@ -57,3 +57,9 @@ Go to **Run and Debug** and select **Run Extension** from the menu. Hit the play
 
 [Checkout the Changelog](./CHANGELOG.md)
 
+## Limitations
+
+This extension is currently not fully supportive of Class Components. You can use it just fine on them, but the passed props may be wrongy extracted. Let it be known if you wish full support on them.
+
+Even with this disclaimer, be welcome to open issues related to its use with Class Components, as to improve the implementation when support is given.
+
