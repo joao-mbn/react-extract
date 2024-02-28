@@ -2,22 +2,23 @@ import * as vscode from 'vscode';
 import { isFileTypescript } from './checks';
 import { extractProps } from './extractProps';
 import { ExtractionArgs } from './types';
+import { capitalizeComponentName, removeNonWordCharacters } from './utils';
 
 export async function extractComponent(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
-  const componentName = await vscode.window.showInputBox({
+  const componentGivenName = await vscode.window.showInputBox({
     value: 'Component',
     title: 'Give the extracted component a name'
   });
-
   // If the user clears the input or cancels the input, it's implied that the user doesn't want to proceed.
-  if (!componentName) return;
+  if (!componentGivenName) return;
 
-  const args: ExtractionArgs = {
-    document,
-    range,
-    componentName,
-    isTypescript: isFileTypescript(document)
-  };
+  const componentNameWithoutNonWordChars = removeNonWordCharacters(componentGivenName);
+  if (!componentNameWithoutNonWordChars) return;
+
+  const componentName = capitalizeComponentName(componentNameWithoutNonWordChars);
+  const isTypescript = isFileTypescript(document);
+
+  const args: ExtractionArgs = { document, range, componentName, isTypescript };
 
   await buildExtractedComponent(args);
 }
