@@ -25,6 +25,13 @@
       ],
       "outFiles": ["${workspaceFolder}/out/test/**/*.js"],
       "preLaunchTask": "tasks: watch-tests"
+    },
+    {
+      "name": "Create Test Case",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/test/createTestCase.js",
+      "args": ["testCase"]
     }
   ]
 }

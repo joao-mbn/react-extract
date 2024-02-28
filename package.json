@@ -51,13 +51,14 @@
     "compile": "webpack",
     "watch": "webpack --watch",
     "package": "webpack --mode production --devtool hidden-source-map",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "test": "vscode-test",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "create-test": "node ./src/test/createTestCase.js",
     "lint": "eslint src --ext ts",
     "lint:fix": "eslint src --fix",
-    "prettier:write": "prettier src --write",
-    "test": "vscode-test"
+    "prettier:write": "prettier src --write"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.6",
