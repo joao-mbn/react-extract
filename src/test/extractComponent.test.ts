@@ -284,7 +284,7 @@ suite('buildExtractedComponent', function () {
       const componentName = 'Extracted';
 
       test('with typescript', async function () {
-        const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(9, 10));
+        const range = new vscode.Range(new vscode.Position(15, 4), new vscode.Position(20, 10));
         const { tsTest, tsResult } = await getDocuments('spread');
         await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
         assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
