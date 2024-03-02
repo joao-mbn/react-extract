@@ -1,12 +1,13 @@
-import React, { ComponentPropsWithRef } from 'react';
+import React, { ReactNode } from 'react';
 
-function Component({ ...props }: ComponentPropsWithRef<'div'>) {
-  const min = Math.floor(Math.random() * 100);
+interface ComponentProps {
+  style: { color: string; nested1: string; nested2: string };
+  children: ReactNode;
+  prop1: string[];
+  prop2: string;
+  prop3: string;
+}
 
-  return (
-    <div className='w-full'>
-      <div {...props}>Another Test</div>
-      <input min={min} />
-    </div>
-  );
+function Component({ ...props }: ComponentProps) {
+  return <div {...props}></div>;
 }

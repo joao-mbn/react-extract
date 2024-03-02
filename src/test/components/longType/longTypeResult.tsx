@@ -40,7 +40,7 @@ function Component({ translation }: ComponentProps) {
 }
 
 interface ExtractedProps {
-  translation: any;
+  translation: ComponentProps['translation'];
 }
 
 function Extracted({ translation }: ExtractedProps) {

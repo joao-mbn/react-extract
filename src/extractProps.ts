@@ -1,5 +1,6 @@
 import ts from 'typescript';
 import * as vscode from 'vscode';
+import { getNodeType } from './getNodeType';
 import { ExtractedProp, ExtractionArgs } from './types';
 
 export function extractProps(args: ExtractionArgs) {
@@ -25,7 +26,7 @@ interface VisitorArguments extends ExtractionArgs {
 }
 
 function visit(args: VisitorArguments) {
-  const { node, sourceFile, range, checker, props } = args;
+  const { node, sourceFile, range, checker, props, isTypescript } = args;
 
   // visiting node outside selection
   const nodeRange = getNodeRange(node, sourceFile);
@@ -81,24 +82,20 @@ function visit(args: VisitorArguments) {
   }
 
   // value has a value declaration that should be passed as a prop
-  const newProp = {
-    name: node.getText(),
-    type: getNodeTypeString(node, checker),
-    isSpread: node.parent?.kind === ts.SyntaxKind.JsxSpreadAttribute
-  };
 
+  const isSpread = isNodeChildOfSpread(node);
+  const type = isTypescript ? getNodeType({ node, checker, valueDeclaration, isSpread }) : 'any';
+
+  const newProp = { name: node.getText(), type, isSpread };
   props.set(newProp.name, newProp);
-}
-
-function getNodeTypeString(node: ts.Node, checker: ts.TypeChecker) {
-  const type = checker.getTypeAtLocation(node);
-  const typeAsString = checker.typeToString(type, node);
-  const isPropTypeTruncated = /... \d+ more .../.test(typeAsString);
-  return isPropTypeTruncated ? 'any' : typeAsString;
 }
 
 function getNodeRange(node: ts.Node, sourceFile: ts.SourceFile) {
   const start = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
   const end = sourceFile.getLineAndCharacterOfPosition(node.end);
   return new vscode.Range(start.line, start.character, end.line, end.character);
+}
+
+function isNodeChildOfSpread(node: ts.Node) {
+  return node.parent?.kind === ts.SyntaxKind.JsxSpreadAttribute;
 }

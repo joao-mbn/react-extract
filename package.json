@@ -3,7 +3,7 @@
   "displayName": "React Extract",
   "description": "Extract a valid piece of JSX code into a new function, passing props and creating its interface.",
   "publisher": "joao-mbn",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/joao-mbn/react-extract"

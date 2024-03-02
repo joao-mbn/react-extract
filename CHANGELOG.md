@@ -4,7 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [0.4.0] - 2024-03-02
+
+### Added
+
+- Some support to prop types for props whose type is long and gets truncated
+
+### Fixed
+
+- Prop types for props passed from function parameters
+- Prop types for props passed from array destructuring
+- Prop types for props passed from nested object destructuring
 
 ## [0.3.1] - 2024-02-28
 
