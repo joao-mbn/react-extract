@@ -17,7 +17,7 @@ function Component({ children, style: { color, ...nestedProps }, ...props }: Com
 }
 
 interface ExtractedProps {
-  children: any;
+  children: ReactNode;
   color: string;
   props: { prop1: string[]; prop2: string; prop3: string };
   nestedProps: { nested1: string; nested2: string };

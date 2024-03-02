@@ -5,3 +5,7 @@ export function removeNonWordCharacters(value: string) {
 export function capitalizeComponentName(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
+
+export function truncateType(type: string) {
+  return type.length > 500 ? 'any' : type;
+}

@@ -1,6 +1,6 @@
-import React, { ComponentPropsWithRef } from 'react';
+import React, { ComponentPropsWithoutRef } from 'react';
 
-function Component({ children, style: { color, ...nestedProps } = {}, ...props }: ComponentPropsWithRef<'div'>) {
+function Component({ children, style: { color, ...nestedProps } = {}, ...props }: ComponentPropsWithoutRef<'div'>) {
   return (
     <div>
       <div {...props} style={{ ...nestedProps }}>

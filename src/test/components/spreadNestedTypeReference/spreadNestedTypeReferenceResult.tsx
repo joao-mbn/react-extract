@@ -1,11 +1,11 @@
 import { Property } from 'csstype';
-import React, { ComponentPropsWithRef } from 'react';
+import React, { ComponentPropsWithoutRef } from 'react';
 
-function Component({ children, style: { color, ...nestedProps } = {}, ...props }: ComponentPropsWithRef<'div'>) {
+function Component({ children, style: { color, ...nestedProps } = {}, ...props }: ComponentPropsWithoutRef<'div'>) {
   return <Extracted children={children} color={color} nestedProps={nestedProps} {...props} />;
 }
 
-interface ExtractedProps extends Omit<ComponentPropsWithRef<'div'>, 'children' | 'style'> {
+interface ExtractedProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children' | 'style'> {
   children: React.ReactNode;
   color: Property.Color | undefined;
   nestedProps: Omit<React.CSSProperties | undefined, 'color'>;

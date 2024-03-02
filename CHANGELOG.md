@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Fixed
 
 - Prop types for props passed from function parameters
+- Prop types for props passed from array destructuring
+- Prop types for props passed from nested object destructuring
 
 ## [0.3.1] - 2024-02-28
 
