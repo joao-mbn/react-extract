@@ -8,7 +8,7 @@ function Component({ children, style: { color, ...nestedProps } = {}, ...props }
 interface ExtractedProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children' | 'style'> {
   children: React.ReactNode;
   color: Property.Color | undefined;
-  nestedProps: Omit<React.CSSProperties | undefined, 'color'>;
+  nestedProps: Omit<React.CSSProperties, 'color'>;
 }
 
 function Extracted({ children, color, nestedProps, ...props }: ExtractedProps) {

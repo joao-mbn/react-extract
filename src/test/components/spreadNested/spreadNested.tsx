@@ -22,4 +22,3 @@ function Component({ children, style: { color, ...nestedProps }, ...props }: Com
     </div>
   );
 }
-

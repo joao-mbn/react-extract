@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { truncateType } from './utils';
+import { chooseAdequateType, truncateType } from './utils';
 
 interface GetNodeTypeArguments {
   valueDeclaration: ts.Declaration;
@@ -13,14 +13,7 @@ export function getNodeType(args: GetNodeTypeArguments) {
   const resolvedType = getNodeTypeString(args);
   const heuristicType = truncateType(getTypeHeuristically(args));
 
-  if (resolvedType !== 'any' && heuristicType === 'any') return resolvedType;
-  if (resolvedType === 'any' && heuristicType !== 'any') return heuristicType;
-
-  if (resolvedType !== 'any' && heuristicType !== 'any') {
-    return resolvedType.length <= heuristicType.length ? resolvedType : heuristicType;
-  }
-
-  return 'any';
+  return chooseAdequateType(resolvedType, heuristicType);
 }
 
 function getNodeTypeString({ node, checker, typeFormatFlag }: GetNodeTypeArguments) {
@@ -41,49 +34,101 @@ function getTypeHeuristically(args: GetNodeTypeArguments) {
   if (!shouldGetHeuristicType) return 'any';
 
   if (valueDeclaration.kind === ts.SyntaxKind.Parameter) {
-    let type = 'any';
-    valueDeclaration.forEachChild((child) => {
-      if (child.kind === ts.SyntaxKind.TypeReference) {
-        type = child.getText();
-      }
-    });
-    return type;
+    return getParameterType({ valueDeclaration });
   }
 
   const isSpreadDeclaration = valueDeclaration.getFirstToken()?.kind === ts.SyntaxKind.DotDotDotToken ?? false;
   const parent = valueDeclaration.parent;
-  const parentType = getNodeTypeString({
+  const parentType = getValueDeclarationParentType({
     ...args,
     node: parent,
     typeFormatFlag: ts.TypeFormatFlags.NodeBuilderFlagsMask
   });
 
   if (parent.kind === ts.SyntaxKind.ArrayBindingPattern) {
-    if (isSpreadDeclaration) {
-      return parentType;
-    } else {
-      const arrayArgumentAngleBracketsSyntax = [...(parentType.match(/Array<([\s\S]+)>/) ?? [])][1];
-      const arrayArgumentSquareBracketSyntax = [...(parentType.match(/([\s\S]+)\[]/) ?? [])][1];
-      return arrayArgumentAngleBracketsSyntax || arrayArgumentSquareBracketSyntax || `${parentType}[number]`;
-    }
+    return getArrayBoundValueType({ isSpreadDeclaration, parentType });
   }
 
   if (parent.kind === ts.SyntaxKind.ObjectBindingPattern) {
-    if (isSpreadDeclaration) {
-      const siblings = new Set<string>();
-      parent.forEachChild((child) => {
-        if (child !== valueDeclaration) {
-          siblings.add(child.getText());
-        }
-      });
-      if (siblings.size === 0) return parentType;
-
-      return `Omit<${parentType}, ${[...siblings.values()].map((v) => `'${v}'`).join(' | ')}>`;
-    } else {
-      return `Pick<${parentType}, '${valueDeclaration.getText()}'>`;
-    }
+    return getObjectBoundValueType({ isSpreadDeclaration, parentType, parent, valueDeclaration });
   }
 
   // Unforeseen case
   return 'any';
+}
+
+interface GetArrayBoundValueTypeArgs {
+  isSpreadDeclaration: boolean;
+  parentType: string;
+}
+
+function getArrayBoundValueType({ isSpreadDeclaration, parentType }: GetArrayBoundValueTypeArgs) {
+  if (isSpreadDeclaration) {
+    return parentType;
+  } else {
+    const arrayArgumentAngleBracketsSyntax = [...(parentType.match(/Array<([\s\S]+)>/) ?? [])][1];
+    const arrayArgumentSquareBracketSyntax = [...(parentType.match(/([\s\S]+)\[]/) ?? [])][1];
+    return arrayArgumentAngleBracketsSyntax || arrayArgumentSquareBracketSyntax || `${parentType}[number]`;
+  }
+}
+
+interface GetObjectBoundValueTypeArgs {
+  parent: ts.Node;
+  valueDeclaration: ts.Node;
+  isSpreadDeclaration: boolean;
+  parentType: string;
+}
+
+function getObjectBoundValueType({
+  parent,
+  valueDeclaration,
+  isSpreadDeclaration,
+  parentType
+}: GetObjectBoundValueTypeArgs) {
+  if (isSpreadDeclaration) {
+    const siblings = new Set<string>();
+
+    parent.forEachChild((child) => {
+      if (child !== valueDeclaration) {
+        child.forEachChild((child) => {
+          if (child.kind === ts.SyntaxKind.Identifier) {
+            siblings.add(child.getText());
+          }
+        });
+      }
+    });
+
+    if (siblings.size === 0) return parentType;
+
+    return `Omit<${parentType}, ${[...siblings.values()].map((v) => `'${v}'`).join(' | ')}>`;
+  } else {
+    return `${parentType}['${valueDeclaration.getText()}']`;
+  }
+}
+
+interface GetTypeByTypeReferenceArgs {
+  valueDeclaration: ts.Node;
+}
+
+function getParameterType({ valueDeclaration }: GetTypeByTypeReferenceArgs) {
+  let type = 'any';
+  valueDeclaration.forEachChild((child) => {
+    if (child.kind === ts.SyntaxKind.TypeReference) {
+      type = child.getText();
+    }
+  });
+  return type;
+}
+
+function getValueDeclarationParentType(args: GetNodeTypeArguments) {
+  const { node: parent } = args;
+  const parentResolvedType = getNodeTypeString(args);
+  let parentHeuristicType = 'any';
+
+  if (parent.kind === ts.SyntaxKind.ObjectBindingPattern && parent.parent.kind === ts.SyntaxKind.Parameter) {
+    parentHeuristicType = getParameterType({ valueDeclaration: parent.parent });
+  }
+
+  const parentType = chooseAdequateType(parentResolvedType, parentHeuristicType);
+  return parentType;
 }

@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { capitalizeComponentName, removeNonWordCharacters, truncateType } from '../utils';
+import { capitalizeComponentName, chooseAdequateType, removeNonWordCharacters, truncateType } from '../utils';
 
 suite('removeNonWordCharacters', function () {
   test('should remove non-word characters from the string', function () {
@@ -73,6 +73,56 @@ suite('truncateType', function () {
     const type = '';
     const result = truncateType(type);
     const expected = type;
+    assert.strictEqual(result, expected);
+  });
+});
+
+suite('chooseAdequateType', function () {
+  test('should return resolvedType if resolvedType is not "any" and heuristicType is "any"', function () {
+    const resolvedType = 'string';
+    const heuristicType = 'any';
+    const expected = resolvedType;
+    const result = chooseAdequateType(resolvedType, heuristicType);
+    assert.strictEqual(result, expected);
+  });
+
+  test('should return heuristicType if resolvedType is "any" and heuristicType is not "any"', function () {
+    const resolvedType = 'any';
+    const heuristicType = 'string';
+    const expected = heuristicType;
+    const result = chooseAdequateType(resolvedType, heuristicType);
+    assert.strictEqual(result, expected);
+  });
+
+  test('should return resolvedType if resolvedType and heuristicType are not "any" and resolvedType length is less than or equal to heuristicType length', function () {
+    const resolvedType = 'string';
+    const heuristicType = 'number';
+    const expected = resolvedType;
+    const result = chooseAdequateType(resolvedType, heuristicType);
+    assert.strictEqual(result, expected);
+  });
+
+  test('should return heuristicType if resolvedType and heuristicType are not "any" and heuristicType length is less than resolvedType length', function () {
+    const resolvedType = `{
+      title?: string | undefined;
+      prefix?: string | undefined;
+      property?: string | undefined;
+      slot?: string | undefined;
+      key?: React.Key | null | undefined;
+      defaultChecked?: boolean | undefined;
+      ... 257 more ...;
+      onTransitionEndCapture?: React.TransitionEventHandler<...> | undefined;`;
+    const heuristicType = "ComponentPropsWithoutRef<'div'>";
+    const expected = heuristicType;
+    const result = chooseAdequateType(resolvedType, heuristicType);
+    assert.strictEqual(result, expected);
+  });
+
+  test('should return "any" if resolvedType and heuristicType are "any"', function () {
+    const resolvedType = 'any';
+    const heuristicType = 'any';
+    const expected = 'any';
+    const result = chooseAdequateType(resolvedType, heuristicType);
     assert.strictEqual(result, expected);
   });
 });
