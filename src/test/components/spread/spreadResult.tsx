@@ -1,20 +1,19 @@
-import React, { ComponentPropsWithRef } from 'react';
+import React, { ReactNode } from 'react';
 
-function Component({ ...props }: ComponentPropsWithRef<'div'>) {
-  const min = Math.floor(Math.random() * 100);
-
-  return <Extracted min={min} {...props} />;
+interface ComponentProps {
+  style: { color: string; nested1: string; nested2: string };
+  children: ReactNode;
+  prop1: string[];
+  prop2: string;
+  prop3: string;
 }
 
-interface ExtractedProps extends ComponentPropsWithRef<'div'> {
-  min: number;
+function Component({ ...props }: ComponentProps) {
+  return <Extracted {...props} />;
 }
 
-function Extracted({ min, ...props }: ExtractedProps) {
-  return (
-    <div className='w-full'>
-      <div {...props}>Another Test</div>
-      <input min={min} />
-    </div>
-  );
+interface ExtractedProps extends ComponentProps {}
+
+function Extracted({ ...props }: ExtractedProps) {
+  return <div {...props}></div>;
 }
