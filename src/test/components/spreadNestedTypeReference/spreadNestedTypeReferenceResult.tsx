@@ -1,3 +1,4 @@
+import { Property } from 'csstype';
 import React, { ComponentPropsWithRef } from 'react';
 
 function Component({ children, style: { color, ...nestedProps } = {}, ...props }: ComponentPropsWithRef<'div'>) {

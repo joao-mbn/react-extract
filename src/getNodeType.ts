@@ -1,26 +1,28 @@
 import ts from 'typescript';
 
-interface GetNodeTypeArguments extends GetOriginalNodeTypeStringArguments {
+interface GetNodeTypeArguments {
   valueDeclaration: ts.Declaration;
   isSpread: boolean;
-}
-
-export function getNodeType(args: GetNodeTypeArguments) {
-  const { node, checker, isSpread } = args;
-  const typeAsString = getNodeTypeString({ node, checker });
-
-  if (!isSpread || typeAsString !== 'any') return typeAsString;
-
-  return getSpreadSimplifiedType(args);
-}
-
-interface GetOriginalNodeTypeStringArguments {
   node: ts.Node;
   checker: ts.TypeChecker;
   typeFormatFlag?: ts.TypeFormatFlags;
 }
 
-function getNodeTypeString({ node, checker, typeFormatFlag }: GetOriginalNodeTypeStringArguments) {
+export function getNodeType(args: GetNodeTypeArguments) {
+  const resolvedType = getNodeTypeString(args);
+  const heuristicType = getTypeHeuristically(args);
+
+  if (resolvedType !== 'any' && heuristicType === 'any') return resolvedType;
+  if (resolvedType === 'any' && heuristicType !== 'any') return heuristicType;
+
+  if (resolvedType !== 'any' && heuristicType !== 'any') {
+    return resolvedType.length <= heuristicType.length ? resolvedType : heuristicType;
+  }
+
+  return 'any';
+}
+
+function getNodeTypeString({ node, checker, typeFormatFlag }: GetNodeTypeArguments) {
   const type = checker.getTypeAtLocation(node);
   const typeAsString = checker.typeToString(type, node, typeFormatFlag);
 
@@ -29,34 +31,40 @@ function getNodeTypeString({ node, checker, typeFormatFlag }: GetOriginalNodeTyp
   return isPropTypeTruncated ? 'any' : typeAsString;
 }
 
-function getSpreadSimplifiedType({ valueDeclaration, checker }: GetNodeTypeArguments) {
-  const id = valueDeclaration.pos;
-  if (valueDeclaration.kind !== ts.SyntaxKind.BindingElement) return 'any';
+function getTypeHeuristically(args: GetNodeTypeArguments) {
+  const { valueDeclaration, isSpread } = args;
 
-  const parent = valueDeclaration.parent;
-  if (parent.kind === ts.SyntaxKind.ArrayBindingPattern) {
-    // TODO: handle array destructuring
-    return 'any';
+  const shouldGetHeuristicType = isSpread || valueDeclaration.kind === ts.SyntaxKind.Parameter;
+  if (!shouldGetHeuristicType) return 'any';
+
+  if (valueDeclaration.kind === ts.SyntaxKind.Parameter) {
+    let type = 'any';
+    valueDeclaration.forEachChild((child) => {
+      if (child.kind === ts.SyntaxKind.TypeReference) {
+        type = child.getText();
+      }
+    });
+    return type;
   }
 
+  const parent = valueDeclaration.parent;
   if (parent.kind !== ts.SyntaxKind.ObjectBindingPattern) return 'any';
 
-  const siblingNames = new Set<string>();
-
-  parent.forEachChild(
-    (child) =>
-      child.pos !== id &&
-      child.forEachChild((grandChild) => ts.isIdentifier(grandChild) && siblingNames.add(grandChild.getText()))
-  );
-
-  const grandParentType = getNodeTypeString({
-    checker,
+  const parentType = getNodeTypeString({
+    ...args,
     node: parent,
     typeFormatFlag: ts.TypeFormatFlags.NodeBuilderFlagsMask
   });
-  if (grandParentType === 'any' || siblingNames.size === 0) return grandParentType;
+  if (parentType === 'any') return 'any';
 
-  const type = `Omit<${grandParentType}, ${[...siblingNames.values()].map((v) => `'${v}'`).join(' | ')}>`;
+  const nephews = new Set<string>();
+  parent.forEachChild(
+    (child) =>
+      child !== valueDeclaration &&
+      child.forEachChild((grandChild) => ts.isIdentifier(grandChild) && nephews.add(grandChild.getText()))
+  );
+  if (nephews.size === 0) return parentType;
 
+  const type = `Omit<${parentType}, ${[...nephews.values()].map((v) => `'${v}'`).join(' | ')}>`;
   return type;
 }

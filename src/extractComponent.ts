@@ -18,6 +18,8 @@ export async function extractComponent(document: vscode.TextDocument, range: vsc
   const componentName = capitalizeComponentName(componentNameWithoutNonWordChars);
   const isTypescript = isFileTypescript(document);
 
+  console.log(range);
+
   const args: ExtractionArgs = { document, range, componentName, isTypescript };
 
   await buildExtractedComponent(args);

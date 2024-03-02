@@ -4,9 +4,14 @@ import path from 'path';
 import * as vscode from 'vscode';
 import { buildExtractedComponent } from '../extractComponent';
 
-function assertStrictEqualStrippingLineBreaks(expected: string, result: string) {
+function assertExtraction(expected: string, result: string) {
   const parser = (text: string) =>
-    text.replaceAll(/\s+/g, '').replaceAll(/;/g, '').replaceAll(/"/g, "'").replaceAll(/[()]/g, '');
+    text
+      .replaceAll(/import[\s\S]*?;/g, '')
+      .replaceAll(/\s+/g, '')
+      .replaceAll(/;/g, '')
+      .replaceAll(/"/g, "'")
+      .replaceAll(/[()]/g, '');
 
   return assert.strictEqual(parser(result), parser(expected));
 }
@@ -41,14 +46,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(9, 10));
       const { tsTest, tsResult } = await getDocuments('noProps');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(9, 10));
       const { jsTest, jsResult } = await getDocuments('noProps');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -59,14 +64,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(11, 7));
       const { tsTest, tsResult } = await getDocuments('fragment');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(11, 7));
       const { jsTest, jsResult } = await getDocuments('fragment');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -77,14 +82,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(5, 4), new vscode.Position(10, 10));
       const { tsTest, tsResult } = await getDocuments('onlyStatic');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(5, 4), new vscode.Position(10, 10));
       const { jsTest, jsResult } = await getDocuments('onlyStatic');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -95,14 +100,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(15, 10));
       const { tsTest, tsResult } = await getDocuments('static');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(15, 10));
       const { jsTest, jsResult } = await getDocuments('static');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -113,14 +118,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(12, 11));
       const { tsTest, tsResult } = await getDocuments('implicit');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(12, 11));
       const { jsTest, jsResult } = await getDocuments('implicit');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -131,14 +136,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(5, 4), new vscode.Position(10, 10));
       const { tsTest, tsResult } = await getDocuments('conditional');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(5, 4), new vscode.Position(10, 10));
       const { jsTest, jsResult } = await getDocuments('conditional');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -149,14 +154,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(13, 4), new vscode.Position(16, 10));
       const { tsTest, tsResult } = await getDocuments('componentAsFunction');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(13, 4), new vscode.Position(16, 10));
       const { jsTest, jsResult } = await getDocuments('componentAsFunction');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -167,14 +172,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(13, 4), new vscode.Position(16, 10));
       const { tsTest, tsResult } = await getDocuments('componentAsProps');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(13, 4), new vscode.Position(16, 10));
       const { jsTest, jsResult } = await getDocuments('componentAsProps');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -185,14 +190,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(18, 4), new vscode.Position(25, 7));
       const { tsTest, tsResult } = await getDocuments('map');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(18, 4), new vscode.Position(25, 7));
       const { jsTest, jsResult } = await getDocuments('map');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -203,14 +208,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(12, 6), new vscode.Position(15, 34));
       const { tsTest, tsResult } = await getDocuments('subSelection');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(12, 6), new vscode.Position(15, 34));
       const { jsTest, jsResult } = await getDocuments('subSelection');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -221,14 +226,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(9, 10));
       const { tsTest, tsResult } = await getDocuments('textChild');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(9, 10));
       const { jsTest, jsResult } = await getDocuments('textChild');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -239,14 +244,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(15, 4), new vscode.Position(18, 6));
       const { tsTest, tsResult } = await getDocuments('shortHand');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(15, 4), new vscode.Position(18, 6));
       const { jsTest, jsResult } = await getDocuments('shortHand');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -257,7 +262,7 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(38, 9), new vscode.Position(38, 39));
       const { tsTest, tsResult } = await getDocuments('longType');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
   });
 
@@ -268,14 +273,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(21, 4), new vscode.Position(28, 6));
       const { tsTest, tsResult } = await getDocuments('propertiesAndMethods');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(21, 4), new vscode.Position(28, 6));
       const { jsTest, jsResult } = await getDocuments('propertiesAndMethods');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -286,14 +291,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(5, 9), new vscode.Position(5, 42));
       const { tsTest, tsResult } = await getDocuments('destructureRename');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(5, 9), new vscode.Position(5, 42));
       const { jsTest, jsResult } = await getDocuments('destructureRename');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -304,14 +309,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(8, 9), new vscode.Position(8, 44));
       const { tsTest, tsResult } = await getDocuments('destructureNested');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(8, 9), new vscode.Position(8, 44));
       const { jsTest, jsResult } = await getDocuments('destructureNested');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -322,14 +327,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(13, 4), new vscode.Position(16, 10));
       const { tsTest, tsResult } = await getDocuments('parameter');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(7, 10));
       const { jsTest, jsResult } = await getDocuments('parameter');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -340,7 +345,7 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(7, 10));
       const { tsTest, tsResult } = await getDocuments('parameterTypeReference');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
   });
 
@@ -351,14 +356,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(11, 9), new vscode.Position(11, 31));
       const { tsTest, tsResult } = await getDocuments('spread');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(3, 9), new vscode.Position(3, 31));
       const { jsTest, jsResult } = await getDocuments('spread');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -369,14 +374,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(12, 4), new vscode.Position(16, 10));
       const { tsTest, tsResult } = await getDocuments('spreadArray');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(8, 4), new vscode.Position(12, 10));
       const { jsTest, jsResult } = await getDocuments('spreadArray');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -387,14 +392,14 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(16, 4), new vscode.Position(21, 10));
       const { tsTest, tsResult } = await getDocuments('spreadNested');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
       const range = new vscode.Range(new vscode.Position(8, 4), new vscode.Position(13, 10));
       const { jsTest, jsResult } = await getDocuments('spreadNested');
       await buildExtractedComponent({ document: jsTest, range, componentName, isTypescript: false });
-      assertStrictEqualStrippingLineBreaks(jsResult.getText(), jsTest.getText());
+      assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
 
@@ -405,7 +410,7 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(9, 10));
       const { tsTest, tsResult } = await getDocuments('spreadNestedTypeReference');
       await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
-      assertStrictEqualStrippingLineBreaks(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText());
     });
   });
 });

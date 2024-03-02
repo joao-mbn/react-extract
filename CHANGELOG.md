@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+### Fixed
+
+- Prop types for props passed from function parameters
+
 ## [0.3.1] - 2024-02-28
 
 ### Fixed
