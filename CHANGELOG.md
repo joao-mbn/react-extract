@@ -6,10 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+## [0.5.0] - 2024-03-03
+
 ### Changed
 
 - Category in Extension Manifest
 - Extension colors to match those of the latest react version
+- Demo gif
 
 ## [0.4.0] - 2024-03-02
 
