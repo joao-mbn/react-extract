@@ -13,7 +13,8 @@
     "vscode": "^1.86.0"
   },
   "categories": [
-    "Other"
+    "Formatters",
+    "Programming Languages"
   ],
   "keywords": [
     "react",
