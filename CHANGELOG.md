@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Changed
 
 - Category in Extension Manifest
+- Extension colors to match those of the latest react version
 
 ## [0.4.0] - 2024-03-02
 

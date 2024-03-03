@@ -16,6 +16,10 @@
     "Formatters",
     "Programming Languages"
   ],
+  "galleryBanner": {
+    "color": "#23272f",
+    "theme": "dark"
+  },
   "keywords": [
     "react",
     "refactor",
