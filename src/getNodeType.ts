@@ -45,6 +45,8 @@ function getTypeHeuristically(args: GetNodeTypeArguments) {
     typeFormatFlag: ts.TypeFormatFlags.NodeBuilderFlagsMask
   });
 
+  if (parentType === 'any') return isSpreadDeclaration ? 'Record<any, any>' : 'any';
+
   if (parent.kind === ts.SyntaxKind.ArrayBindingPattern) {
     return getArrayBoundValueType({ isSpreadDeclaration, parentType });
   }

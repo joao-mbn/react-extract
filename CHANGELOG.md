@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+### Fixed
+
+- Default types from destructured and spread props from object binding typed as any
+
 ## [0.5.0] - 2024-03-03
 
 ### Changed

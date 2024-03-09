@@ -38,9 +38,12 @@ export async function buildExtractedComponent(args: ExtractionArgs) {
   await editor.edit((editBuilder) => {
     const shouldDisplayInterface = isTypescript && props.length > 0;
 
+    const singleSpreadType = props.find((prop) => prop.isSpread)?.type;
+    const singleSpreadExtends = hasSingleSpread && singleSpreadType ? `extends ${singleSpreadType}` : '';
+
     const interfaceName = `${componentName}Props`;
     const extractedComponentInterface = `\n
-      interface ${interfaceName} ${hasSingleSpread ? `extends ${props.find((prop) => prop.isSpread)?.type ?? 'any'}` : ''} {
+      interface ${interfaceName} ${singleSpreadExtends} {
         ${props
           .filter(({ isSpread }) => !hasSingleSpread || (hasSingleSpread && !isSpread))
           .map(({ name, type }) => `${name}: ${type}`)

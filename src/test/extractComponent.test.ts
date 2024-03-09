@@ -413,4 +413,15 @@ suite('buildExtractedComponent', function () {
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
   });
+
+  suite('infers default types from destructured and spread props from object binding typed as any', function () {
+    const componentName = 'Extracted';
+
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
+      const { tsTest, tsResult } = await getDocuments('spreadAny');
+      await buildExtractedComponent({ document: tsTest, range, componentName, isTypescript: true });
+      assertExtraction(tsResult.getText(), tsTest.getText());
+    });
+  });
 });

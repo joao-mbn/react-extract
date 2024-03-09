@@ -53,6 +53,16 @@ Go to **Run and Debug** and select **Run Extension** from the menu. Hit the play
 4. Select **tasks: watch tests**.
 5. Run the tests from the test explorer.
 
+#### Creating a new Integration test for Extract Component
+
+You can add a new folder under the `src/test/components` folder with the .jsx and .tsx files and their results using the project's naming convention via a script, as follows:
+
+```sh
+$ npm run create-test myNewTestCase
+```
+
+_Replace **myNewTestCase** with the appropriate test case name._
+
 ## Release Notes
 
 [Checkout the Changelog](./CHANGELOG.md)
