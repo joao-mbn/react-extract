@@ -54,6 +54,7 @@
       "title": "React Extract",
       "properties": {
         "reactExtract.functionDeclaration": {
+          "title": "Function Declaration",
           "enum": [
             "arrow",
             "function"
@@ -71,6 +72,7 @@
           "description": "The type of function declaration to be used when extracting the component."
         },
         "reactExtract.typeDeclaration": {
+          "title": "Type Declaration",
           "enum": [
             "interface",
             "type"

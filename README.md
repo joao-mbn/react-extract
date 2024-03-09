@@ -26,6 +26,50 @@ This extension for Visual Studio Code provides a quick way to refactor your Reac
 
 - **Code Placement**: The new function will be placed at the bottom of the current file.
 
+### Configurations
+
+You may customize the way that the extracted component is built, with the following options on your Settings (`Ctrl + ,` or `Cmd + ,`, by default):
+
+#### "Type Declaration" | "reactExtract.typeDeclaration"
+
+- **Description**: The type of type declaration to be used when extracting the component.
+
+- **Accepts**: `"interface" | "type"`
+
+- **Default**: `"interface"`
+
+```typescript
+// interface
+interface ComponentProps {
+  // ...
+}
+
+// type
+type ComponentProps = {
+  // ...
+};
+```
+
+#### "Function Declaration" | "reactExtract.functionDeclaration"
+
+- **Description**: The type of function declaration to be used when extracting the component.
+
+- **Accepts**: `"arrow" | "function"`
+
+- **Default**: `"function"`
+
+```javascript
+// arrow
+const Component = () => (
+  //...
+)
+
+// function
+function Component() {
+  //...
+}
+```
+
 ## Contributions
 
 If you encounter any problems or have suggestions for improvements, please open an issue. Your feedback and contribution is appreciated. If you have the agreed solution as well, please open a pull request.
