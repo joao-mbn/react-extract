@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+## [0.6.0] - 2024-03-09
+
 ### Added
 
 - Configuration option for declaring type as either interface or type.
