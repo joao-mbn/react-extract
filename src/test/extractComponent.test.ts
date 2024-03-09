@@ -5,14 +5,21 @@ import * as vscode from 'vscode';
 import { buildExtractedComponent } from '../extractComponent';
 import { ExtractionArgs } from '../types';
 
-function assertExtraction(expected: string, result: string) {
-  const parser = (text: string) =>
-    text
-      .replaceAll(/import[\s\S]*?;/g, '')
-      .replaceAll(/\s+/g, '')
-      .replaceAll(/;/g, '')
-      .replaceAll(/"/g, "'")
-      .replaceAll(/[()]/g, '');
+interface AssertExtractionFlags {
+  keepSemiColons?: boolean;
+}
+
+function assertExtraction(expected: string, result: string, { keepSemiColons = false }: AssertExtractionFlags = {}) {
+  const parser = (text: string) => {
+    let next = text;
+    next = next.replaceAll(/import[\s\S]*?;/g, '');
+    next = next.replaceAll(/\s+/g, '');
+    next = keepSemiColons ? next : next.replaceAll(/;/g, '');
+    next = next.replaceAll(/"/g, "'");
+    next = next.replaceAll(/[()]/g, '');
+
+    return next;
+  };
 
   return assert.strictEqual(parser(result), parser(expected));
 }
@@ -325,7 +332,7 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(11, 9), new vscode.Position(11, 31));
       const { tsTest, tsResult } = await getDocuments('spread');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range, isTypescript: true });
-      assertExtraction(tsResult.getText(), tsTest.getText());
+      assertExtraction(tsResult.getText(), tsTest.getText(), { keepSemiColons: true });
     });
 
     test('with javascript', async function () {

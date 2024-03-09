@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Fixed
 
 - Default types from destructured and spread props from object binding typed as any
+- Interface extending single spread props but with no other props adding a semi-colon inside the curly brackets.
 
 ## [0.5.0] - 2024-03-03
 

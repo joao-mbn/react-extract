@@ -101,11 +101,9 @@ function getPropsAndDerivedData(args: ExtractionArgs): PropsAndDerivedData {
 function buildTypeDeclaration(args: BuildArgs) {
   const { hasSingleSpread, props, singleSpreadType, typeDeclaration: typeDeclarationType, typeDeclarationName } = args;
 
-  const declaredProps = props
-    .filter(({ isSpread }) => !hasSingleSpread || (hasSingleSpread && !isSpread))
-    .map(({ name, type }) => `${name}: ${type}`)
-    .join(';\n')
-    .concat(';');
+  const propsToDeclare = props.filter(({ isSpread }) => !hasSingleSpread || (hasSingleSpread && !isSpread));
+  const declaredProps =
+    propsToDeclare.map(({ name, type }) => `${name}: ${type}`).join(';\n') + (propsToDeclare.length > 0 ? ';' : '');
 
   if (typeDeclarationType === 'type') {
     return `\n
