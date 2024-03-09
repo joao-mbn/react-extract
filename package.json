@@ -49,6 +49,45 @@
           "when": "false"
         }
       ]
+    },
+    "configuration": {
+      "title": "React Extract",
+      "properties": {
+        "reactExtract.functionDeclaration": {
+          "enum": [
+            "arrow",
+            "function"
+          ],
+          "enumItemLabels": [
+            "Arrow Function",
+            "Named Function"
+          ],
+          "enumDescriptions": [
+            "const Component () => (\n //...\n)",
+            "function Component() {\n //...\n}"
+          ],
+          "type": "string",
+          "default": "function",
+          "description": "The type of function declaration to be used when extracting the component."
+        },
+        "reactExtract.typeDeclaration": {
+          "enum": [
+            "interface",
+            "type"
+          ],
+          "enumItemLabels": [
+            "Interface",
+            "Type"
+          ],
+          "enumDescriptions": [
+            "interface ComponentProps {\n //...\n}",
+            "type ComponentProps = {\n //...\n}"
+          ],
+          "type": "string",
+          "default": "interface",
+          "description": "The type of type declaration to be used when extracting the component."
+        }
+      }
     }
   },
   "scripts": {

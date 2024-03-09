@@ -11,4 +11,24 @@ export type ExtractionArgs = {
   range: vscode.Range | vscode.Selection;
   componentName: string;
   isTypescript: boolean;
+  typeDeclaration: 'interface' | 'type';
+  functionDeclaration: 'function' | 'arrow';
 };
+
+export type PropsAndDerivedData = SingleSpread & {
+  props: ExtractedProp[];
+  shouldDisplayTypeDeclaration: boolean;
+  typeDeclarationName: string;
+};
+
+type SingleSpread =
+  | {
+      hasSingleSpread: true;
+      singleSpreadType: string;
+    }
+  | {
+      hasSingleSpread: false;
+      singleSpreadType: undefined;
+    };
+
+export type BuildArgs = ExtractionArgs & PropsAndDerivedData;

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+### Added
+
+- Configuration option for declaring type as either interface or type.
+- Configuration option for declaring function as either named function or arrow function.
+
 ### Fixed
 
 - Default types from destructured and spread props from object binding typed as any
