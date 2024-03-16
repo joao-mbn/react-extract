@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { chooseAdequateType, truncateType } from './utils';
+import { chooseAdequateType, truncateType } from '../utils';
 
 interface GetNodeTypeArguments {
   valueDeclaration: ts.Declaration;

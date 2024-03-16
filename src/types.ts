@@ -1,3 +1,4 @@
+import ts from 'typescript';
 import * as vscode from 'vscode';
 
 export type ExtractedProp = {
@@ -6,19 +7,26 @@ export type ExtractedProp = {
   type: string;
 };
 
-export type ExtractionArgs = {
+export type ExternalArgs = {
   document: vscode.TextDocument;
   range: vscode.Range | vscode.Selection;
   componentName: string;
-  isTypescript: boolean;
-  typeDeclaration: 'interface' | 'type';
   functionDeclaration: 'function' | 'arrow';
+  typeDeclaration: 'interface' | 'type';
 };
+
+export type ArgsDerivedFromExternalArgs = {
+  isTypescript: boolean;
+  program: ts.Program;
+  sourceFile: ts.SourceFile;
+  typeDeclarationName: string;
+};
+
+export type ExtractionArgs = ExternalArgs & ArgsDerivedFromExternalArgs;
 
 export type PropsAndDerivedData = SingleSpread & {
   props: ExtractedProp[];
   shouldDisplayTypeDeclaration: boolean;
-  typeDeclarationName: string;
 };
 
 type SingleSpread =
@@ -31,4 +39,4 @@ type SingleSpread =
       singleSpreadType: undefined;
     };
 
-export type BuildArgs = ExtractionArgs & PropsAndDerivedData;
+export type BuildArgs = ExtractionArgs & PropsAndDerivedData & { shouldWrapInFragments: boolean };

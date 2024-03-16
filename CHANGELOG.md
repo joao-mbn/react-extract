@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+## [0.7.0] - 2024-03-16
+
+### Added
+
+- Wraps selection in React Fragments if a zero or more than one parent element is present.
+
 ## [0.6.0] - 2024-03-09
 
 ### Added

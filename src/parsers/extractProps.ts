@@ -1,26 +1,21 @@
 import ts from 'typescript';
-import * as vscode from 'vscode';
+import { ExtractedProp, ExtractionArgs } from '../types';
 import { getNodeType } from './getNodeType';
-import { ExtractedProp, ExtractionArgs } from './types';
+import { getNodeRange } from './parsingUtils';
 
 export function extractProps(args: ExtractionArgs) {
-  const { document } = args;
+  const { program, sourceFile } = args;
 
-  const program = ts.createProgram([document.uri.fsPath], { allowJs: true, strict: true });
   const checker = program.getTypeChecker();
 
-  const sourceFile = program.getSourceFile(document.uri.fsPath);
-  if (!sourceFile) return [];
-
   const props: Map<string, ExtractedProp> = new Map();
-  ts.forEachChild(sourceFile, (node) => visit({ node, sourceFile, checker, props, ...args }));
+  ts.forEachChild(sourceFile, (node) => visit({ node, checker, props, ...args }));
 
   return [...props.values()];
 }
 
 interface VisitorArguments extends ExtractionArgs {
   node: ts.Node;
-  sourceFile: ts.SourceFile;
   checker: ts.TypeChecker;
   props: Map<string, ExtractedProp>;
 }
@@ -32,7 +27,7 @@ function visit(args: VisitorArguments) {
   const nodeRange = getNodeRange(node, sourceFile);
   if (!range.intersection(nodeRange)) return;
 
-  // look for variables in nested nodes
+  // looks for nested nodes
   ts.forEachChild(node, (node) => visit({ ...args, node }));
 
   if (!ts.isIdentifier(node)) return;
@@ -88,12 +83,6 @@ function visit(args: VisitorArguments) {
 
   const newProp = { name: node.getText(), type, isSpread };
   props.set(newProp.name, newProp);
-}
-
-function getNodeRange(node: ts.Node, sourceFile: ts.SourceFile) {
-  const start = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
-  const end = sourceFile.getLineAndCharacterOfPosition(node.end);
-  return new vscode.Range(start.line, start.character, end.line, end.character);
 }
 
 function isNodeChildOfSpread(node: ts.Node) {

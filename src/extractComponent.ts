@@ -1,7 +1,9 @@
 import * as vscode from 'vscode';
 import { isFileTypescript } from './checks';
-import { extractProps } from './extractProps';
-import { BuildArgs, ExtractionArgs, PropsAndDerivedData } from './types';
+import { extractProps } from './parsers/extractProps';
+import { determineIfShouldWrapInFragments } from './parsers/fragment';
+import { ArgsDerivedFromExternalArgs, BuildArgs, ExternalArgs, ExtractionArgs, PropsAndDerivedData } from './types';
+import { getProgramAndSourceFile } from './typescriptProgram';
 import { capitalizeComponentName, removeNonWordCharacters } from './utils';
 
 export async function extractComponent(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
@@ -10,24 +12,27 @@ export async function extractComponent(document: vscode.TextDocument, range: vsc
 
   const configs = getFileConfigs();
 
-  const isTypescript = isFileTypescript(document);
-
-  const args: ExtractionArgs = { document, range, componentName, isTypescript, ...configs };
+  const args: ExternalArgs = { document, range, componentName, ...configs };
 
   await buildExtractedComponent(args);
 }
 
-export async function buildExtractedComponent(args: ExtractionArgs) {
-  const { document, range } = args;
+export async function buildExtractedComponent(externalArgs: ExternalArgs) {
+  const { document, range } = externalArgs;
 
-  const propsAndDerivedData = getPropsAndDerivedData(args);
+  const argsDerivedFromExternalArgs = getArgsDerivedFromExternalArgs(externalArgs);
+
+  const extractionArgs = { ...externalArgs, ...argsDerivedFromExternalArgs };
+
+  const shouldWrapInFragments = determineIfShouldWrapInFragments(extractionArgs);
+
+  const propsAndDerivedData = getPropsAndPropsDerivedData(extractionArgs);
   const { shouldDisplayTypeDeclaration } = propsAndDerivedData;
 
+  const buildArgs = { ...extractionArgs, ...propsAndDerivedData, shouldWrapInFragments };
+
   const editor = await vscode.window.showTextDocument(document);
-
   await editor.edit((editBuilder) => {
-    const buildArgs = { ...args, ...propsAndDerivedData };
-
     const typeDeclaration = shouldDisplayTypeDeclaration ? buildTypeDeclaration(buildArgs) : '';
     const functionDeclaration = buildFunctionDeclaration(buildArgs);
 
@@ -72,9 +77,23 @@ function getFileConfigs() {
   return { functionDeclaration, typeDeclaration };
 }
 
-function getPropsAndDerivedData(args: ExtractionArgs): PropsAndDerivedData {
-  const { isTypescript, componentName } = args;
+function getArgsDerivedFromExternalArgs(args: ExternalArgs): ArgsDerivedFromExternalArgs {
+  const { componentName, document } = args;
+
+  const isTypescript = isFileTypescript(document);
   const typeDeclarationName = `${componentName}Props`;
+  const { program, sourceFile } = getProgramAndSourceFile(document);
+
+  if (!sourceFile) {
+    vscode.window.showErrorMessage('Could not get source file');
+    throw new Error('Could not get source file');
+  }
+
+  return { isTypescript, typeDeclarationName, program, sourceFile };
+}
+
+function getPropsAndPropsDerivedData(args: ExtractionArgs): PropsAndDerivedData {
+  const { isTypescript } = args;
 
   const props = extractProps(args).sort((a, b) => {
     if (a.isSpread) return 1;
@@ -89,7 +108,6 @@ function getPropsAndDerivedData(args: ExtractionArgs): PropsAndDerivedData {
   const hasSingleSpread = spreadProps.length === 1;
 
   return {
-    typeDeclarationName,
     props,
     shouldDisplayTypeDeclaration,
     ...(hasSingleSpread
@@ -129,28 +147,34 @@ function buildFunctionDeclaration(args: BuildArgs) {
     props,
     range,
     shouldDisplayTypeDeclaration,
+    shouldWrapInFragments,
     typeDeclarationName
   } = args;
 
   const boundProps = props.map(({ name, isSpread }) => (isSpread && hasSingleSpread ? `...${name}` : name)).join(',\n');
 
+  const functionArguments = `
+    ${props.length > 0 ? `{ ${boundProps} }` : ''}
+    ${shouldDisplayTypeDeclaration ? `: ${typeDeclarationName}` : ''}
+  `;
+
+  const functionReturn = shouldWrapInFragments ? `<>\n${document.getText(range)}\n</>` : document.getText(range);
+
   if (functionDeclarationType === 'arrow') {
     return `
       const ${componentName} = (
-        ${props.length > 0 ? `{ ${boundProps} }` : ''}
-        ${shouldDisplayTypeDeclaration ? `: ${typeDeclarationName}` : ''}
+        ${functionArguments}
       ) => (
-        ${document.getText(range)}
+        ${functionReturn}
       );
     `;
   } else {
     return `
       function ${componentName}(
-        ${props.length > 0 ? `{ ${boundProps} }` : ''}
-        ${shouldDisplayTypeDeclaration ? `: ${typeDeclarationName}` : ''}
+        ${functionArguments}
       ) {
         return (
-          ${document.getText(range)}
+          ${functionReturn}
         );
       }`;
   }
