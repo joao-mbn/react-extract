@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 
 function Child(props: any) {
   return <div>{props}</div>;
@@ -6,7 +6,7 @@ function Child(props: any) {
 
 interface ComponentProps {
   style: { color: string; nested1: string; nested2: string };
-  children: ReactNode;
+  children: React.ReactNode;
   prop1: string[];
   prop2: string;
   prop3: string;
@@ -17,7 +17,7 @@ function Component({ children, style: { color, ...nestedProps }, ...props }: Com
 }
 
 interface ExtractedProps {
-  children: ReactNode;
+  children: React.ReactNode;
   color: string;
   props: Omit<ComponentProps, 'children' | 'style'>;
   nestedProps: { nested1: string; nested2: string };
@@ -33,4 +33,3 @@ function Extracted({ children, color, props, nestedProps }: ExtractedProps) {
     </div>
   );
 }
-
