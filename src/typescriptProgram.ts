@@ -13,3 +13,4 @@ export function getProgramAndSourceFile(document: vscode.TextDocument) {
 
   return { program, sourceFile };
 }
+

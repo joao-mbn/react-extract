@@ -11,19 +11,6 @@ export function extractProps(args: ExtractionArgs) {
   const props: Map<string, ExtractedProp> = new Map();
   ts.forEachChild(sourceFile, (node) => visit({ node, checker, props, ...args }));
 
-  // const emitResult = program.emit();
-  // const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
-
-  // allDiagnostics.forEach((diagnostic) => {
-  //   if (diagnostic.file) {
-  //     const { line, character } = ts.getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start!);
-  //     const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
-  //     console.log(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`);
-  //   } else {
-  //     console.log(ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'));
-  //   }
-  // });
-
   return [...props.values()];
 }
 
