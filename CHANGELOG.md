@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+## [0.7.1] - 2024-03-24
+
+### Fixed
+
+- Typescript program not able to find global and derived types when bundled.
+
 ## [0.7.0] - 2024-03-16
 
 ### Added

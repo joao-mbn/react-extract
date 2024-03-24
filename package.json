@@ -3,7 +3,7 @@
   "displayName": "React Extract",
   "description": "Extract a valid piece of JSX code into a new function, passing props and creating its interface.",
   "publisher": "joao-mbn",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/joao-mbn/react-extract"
@@ -116,6 +116,7 @@
     "@typescript-eslint/parser": "^6.19.1",
     "@vscode/test-cli": "^0.0.4",
     "@vscode/test-electron": "^2.3.9",
+    "copy-webpack-plugin": "^12.0.2",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.2.5",
