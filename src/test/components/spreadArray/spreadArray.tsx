@@ -17,4 +17,3 @@ function Component(props: ComponentProps) {
     </div>
   );
 }
-

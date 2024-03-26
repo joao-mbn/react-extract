@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+## [0.7.2] - 2024-03-26
+
+### Fixed
+
+- d.ts files not being shipped in the VSIX
+
 ## [0.7.1] - 2024-03-24
 
 ### Fixed

@@ -18,3 +18,5 @@ assets/logo.png
 assets/logo.svg
 assets/logo-square.svg
 
+!dist/*.d.ts
+
