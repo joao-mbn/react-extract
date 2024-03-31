@@ -16,6 +16,11 @@ function Component(props: any) {
     <Child
       model={{ shortHand, shortHandFunction, shortHandAnonymousFunction }}
       objectWithShortHand={objectWithShortHand}
+      onClick={() => {
+        const shortHandToIgnore = 'propShortHand';
+        const shortHandObject = { shortHandToIgnore };
+        console.log(JSON.stringify(shortHandObject));
+      }}
     />
   );
 }

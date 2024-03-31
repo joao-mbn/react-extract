@@ -70,10 +70,12 @@ function visit(args: VisitorArguments) {
   // value is declared or is a parameter in the selection itself,
   // e.g. <button onClick={(e) => { const target = e.target; doStuff(target); }} />
   // "onClick" is a JSX Attribute, "e" is a parameter and "target" is a declaration in the selection, but not "doStuff".
-  // shorthand assignments are exceptions, as declaration and reference occupy the same range.
+  // shorthand assignments are exceptions to be checked apart, as declaration and reference occupy the same range.
   const declarationRange = getNodeRange(valueDeclaration, sourceFile);
-  if (range.intersection(declarationRange) && valueDeclaration.kind !== ts.SyntaxKind.ShorthandPropertyAssignment) {
-    return;
+  if (range.intersection(declarationRange)) {
+    if (valueDeclaration.kind !== ts.SyntaxKind.ShorthandPropertyAssignment) return;
+
+    if (isShortHandDeclaredOutsideSelection({ ...args, node })) return;
   }
 
   // value has a value declaration that should be passed as a prop
@@ -87,4 +89,45 @@ function visit(args: VisitorArguments) {
 
 function isNodeChildOfSpread(node: ts.Node) {
   return node.parent?.kind === ts.SyntaxKind.JsxSpreadAttribute;
+}
+
+function isShortHandDeclaredOutsideSelection({ node, sourceFile, range }: VisitorArguments) {
+  /**
+   * There's room for optimizations in this checker:
+   * As search area broadens, it keeps looking the same children over and over.
+   * Also, the first found reference may be within the JSX Expression but out of scope, meaning that a wrong variable has been found.
+   * Example: In the else statement, the variable shortHand referenced is not the one in the if statement, but that's the one first found.
+   *
+   * if (shortHand) {
+   *  const shortHand = 'propShortHand';
+   *  const shortHandObject = { shortHand };
+   * } else {
+   *  const shortHandObject = { shortHand };
+   * }
+   */
+
+  let shorthandContainer: ts.Node = node.parent;
+  let hasReferenceWithinShorthandContainer = false;
+
+  function shortHandContainerVisitor(currentNode: ts.Node) {
+    if (hasReferenceWithinShorthandContainer) return;
+
+    if (ts.isIdentifier(currentNode) && currentNode.getText() === node.getText() && node !== currentNode) {
+      hasReferenceWithinShorthandContainer = true;
+    } else {
+      ts.forEachChild(currentNode, shortHandContainerVisitor);
+    }
+  }
+
+  while (
+    range.contains(getNodeRange(shorthandContainer, sourceFile)) &&
+    shorthandContainer.parent &&
+    !hasReferenceWithinShorthandContainer
+  ) {
+    shorthandContainer.forEachChild(shortHandContainerVisitor);
+
+    shorthandContainer = shorthandContainer.parent;
+  }
+
+  return hasReferenceWithinShorthandContainer;
 }

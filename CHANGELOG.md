@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+## [0.7.3] - 2024-03-31
+
+### Fixed
+
+- Shorthand variables declared within selection being passed as props.
+
 ## [0.7.2] - 2024-03-26
 
 ### Fixed
