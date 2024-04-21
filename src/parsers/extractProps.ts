@@ -50,12 +50,23 @@ function visit(args: VisitorArguments) {
   const symbol = checker.getSymbolAtLocation(node);
   if (!symbol) return;
 
-  // no value is being declared
   const valueDeclaration = symbol?.valueDeclaration;
   if (!valueDeclaration) return;
 
+  if (!shouldSymbolValueDeclarationBePassedAsProps({ ...args, valueDeclaration })) return;
+
+  const isSpread = node.parent?.kind === ts.SyntaxKind.JsxSpreadAttribute;
+  const type = isTypescript ? getNodeType({ node, checker, valueDeclaration, isSpread }) : 'any';
+
+  const newProp = { name: node.getText(), type, isSpread };
+  props.set(newProp.name, newProp);
+}
+
+function shouldSymbolValueDeclarationBePassedAsProps(args: VisitorArguments & { valueDeclaration: ts.Node }) {
+  const { sourceFile, range, valueDeclaration } = args;
+
   // value is imported or is a global variable, and thus not bound to the function scope in which the selection is made
-  if (valueDeclaration.getSourceFile().fileName !== sourceFile.fileName) return;
+  if (valueDeclaration.getSourceFile().fileName !== sourceFile.fileName) return false;
 
   // types of declarations that should be passed as props, by trial and error with TS AST.
   const allowedDeclarationKinds = [
@@ -65,7 +76,12 @@ function visit(args: VisitorArguments) {
     ts.SyntaxKind.FunctionDeclaration,
     ts.SyntaxKind.VariableDeclaration
   ];
-  if (!allowedDeclarationKinds.includes(valueDeclaration.kind)) return;
+  if (!allowedDeclarationKinds.includes(valueDeclaration.kind)) return false;
+
+  // A value declaration that is at the current file scope if it does not have any block statement containing it
+  // or it's not passed as function parameter.
+  // They shouldn't be passed as props, as they are available to the extracted component as well.
+  if (isValueDeclarationIsAtFileScope({ ...args, valueDeclaration })) return false;
 
   // value is declared or is a parameter in the selection itself,
   // e.g. <button onClick={(e) => { const target = e.target; doStuff(target); }} />
@@ -73,22 +89,33 @@ function visit(args: VisitorArguments) {
   // shorthand assignments are exceptions to be checked apart, as declaration and reference occupy the same range.
   const declarationRange = getNodeRange(valueDeclaration, sourceFile);
   if (range.intersection(declarationRange)) {
-    if (valueDeclaration.kind !== ts.SyntaxKind.ShorthandPropertyAssignment) return;
+    if (valueDeclaration.kind !== ts.SyntaxKind.ShorthandPropertyAssignment) return false;
 
-    if (isShortHandDeclaredOutsideSelection({ ...args, node })) return;
+    if (isShortHandDeclaredOutsideSelection({ ...args })) return false;
   }
 
-  // value has a value declaration that should be passed as a prop
-
-  const isSpread = isNodeChildOfSpread(node);
-  const type = isTypescript ? getNodeType({ node, checker, valueDeclaration, isSpread }) : 'any';
-
-  const newProp = { name: node.getText(), type, isSpread };
-  props.set(newProp.name, newProp);
+  return true;
 }
 
-function isNodeChildOfSpread(node: ts.Node) {
-  return node.parent?.kind === ts.SyntaxKind.JsxSpreadAttribute;
+/**
+ * Checks if the value declaration is a constant declared in the current file scope. A value declaration that is within the current file and is available at the component if it does not have any block statement containing it
+ * @param args - The visitor arguments.
+ * @param args.valueDeclaration - The value declaration node.
+ * @returns A boolean indicating whether the value declaration is a constant declared in the current file scope.
+ */
+
+function isValueDeclarationIsAtFileScope({ valueDeclaration }: VisitorArguments & { valueDeclaration: ts.Node }) {
+  let valueDeclarationContainer: ts.Node = valueDeclaration;
+  let isAtFileScope = true;
+
+  while (valueDeclarationContainer && isAtFileScope) {
+    if ([ts.SyntaxKind.Parameter, ts.SyntaxKind.Block].includes(valueDeclarationContainer.kind)) {
+      isAtFileScope = false;
+    }
+    valueDeclarationContainer = valueDeclarationContainer.parent;
+  }
+
+  return isAtFileScope;
 }
 
 function isShortHandDeclaredOutsideSelection({ node, sourceFile, range }: VisitorArguments) {
@@ -131,3 +158,4 @@ function isShortHandDeclaredOutsideSelection({ node, sourceFile, range }: Visito
 
   return hasReferenceWithinShorthandContainer;
 }
+
