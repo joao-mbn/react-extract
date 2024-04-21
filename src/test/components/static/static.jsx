@@ -1,6 +1,8 @@
 import React from 'react';
 import { CLASS_NAME, VALUE } from './export';
 
+const CONSTANT_IN_FILE = 1;
+
 function Component() {
   const baseClass = 'my-class-2';
   return (
@@ -13,6 +15,8 @@ function Component() {
       <input min={0} max={VALUE} className={CLASS_NAME + 'text-sm'} />
       <button className={CLASS_NAME + baseClass} />
       <div className='another-class'>Test2</div>
+      <div>{CONSTANT_IN_FILE}</div>
     </div>
   );
 }
+

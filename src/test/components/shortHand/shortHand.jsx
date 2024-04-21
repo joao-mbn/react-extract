@@ -1,4 +1,7 @@
 import React from 'react';
+import { shorthandImport } from './export';
+
+const shortHandConstantInFile = 'shortHandConstantInFile';
 
 function Child(props) {
   return <div>{props}</div>;
@@ -14,7 +17,7 @@ function Component(props) {
 
   return (
     <Child
-      model={{ shortHand, shortHandFunction, shortHandAnonymousFunction }}
+      model={{ shortHand, shortHandFunction, shortHandAnonymousFunction, shorthandImport, shortHandConstantInFile }}
       objectWithShortHand={objectWithShortHand}
       onClick={() => {
         const shortHandToIgnore = 'propShortHand';
@@ -24,3 +27,4 @@ function Component(props) {
     />
   );
 }
+

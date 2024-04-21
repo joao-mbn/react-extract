@@ -103,14 +103,14 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component with a mix of static and non-static props', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(15, 10));
+      const range = new vscode.Range(new vscode.Position(8, 4), new vscode.Position(18, 10));
       const { tsTest, tsResult } = await getDocuments('static');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(15, 10));
+      const range = new vscode.Range(new vscode.Position(8, 4), new vscode.Position(18, 10));
       const { jsTest, jsResult } = await getDocuments('static');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
@@ -231,14 +231,14 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component with short-hand properties', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(15, 4), new vscode.Position(23, 6));
+      const range = new vscode.Range(new vscode.Position(18, 4), new vscode.Position(26, 6));
       const { tsTest, tsResult } = await getDocuments('shortHand');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(15, 4), new vscode.Position(23, 6));
+      const range = new vscode.Range(new vscode.Position(18, 4), new vscode.Position(26, 6));
       const { jsTest, jsResult } = await getDocuments('shortHand');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
@@ -471,3 +471,4 @@ suite('buildExtractedComponent', function () {
     });
   });
 });
+
