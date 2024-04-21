@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+### Fixed
+
+- Constants within file scope being passed as props.
+
 ## [0.7.3] - 2024-03-31
 
 ### Fixed
@@ -99,3 +103,4 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 
 - Initial release with the project's MVP
+
