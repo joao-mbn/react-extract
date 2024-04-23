@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+## [0.7.4] - 2024-04-23
+
+### Fixed
+
+- Variables at file scope being passed as props.
+- Imported variables and variables at file scope being passed as shorthand props.
+
 ## [0.7.3] - 2024-03-31
 
 ### Fixed
@@ -99,3 +106,4 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 
 - Initial release with the project's MVP
+

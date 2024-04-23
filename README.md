@@ -87,7 +87,17 @@ $ code .
 
 ### Running and Debugging the Application
 
-Go to **Run and Debug** and select **Run Extension** from the menu. Hit the play button or F5. For more information go to the [Official VS Code Extension Development Docs](https://code.visualstudio.com/api/get-started/your-first-extension).
+- Comment the following block of code in `webpack.config.js` to avoid conflicts with the ts-lib files in the `node_modules`:
+
+```javascript
+plugins: [
+  new CopyPlugin({
+    patterns: [{ from: 'node_modules/typescript/lib/*.d.ts', to: '[name][ext]' }]
+  })
+];
+```
+
+- Go to **Run and Debug** and select **Run Extension** from the menu. Hit the play button or F5. For more information go to the [Official VS Code Extension Development Docs](https://code.visualstudio.com/api/get-started/your-first-extension).
 
 ### Running Tests
 
