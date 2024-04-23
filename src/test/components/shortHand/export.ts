@@ -1,1 +1,2 @@
-export const shorthandImport = 'shorthandImport';
+export const shortHandImport = 'shortHandImport';
+
