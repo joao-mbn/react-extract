@@ -70,6 +70,44 @@ function Component() {
 }
 ```
 
+#### "Declare With React FC" | "reactExtract.declareWithReactFC"
+
+- **Description**: Whether to declare the component using React.FC or not. [Only takes effect if "Function Declaration" is set to "Arrow Function"].
+
+- **Accepts**: `"true" | "false"`
+
+- **Default**: `"false"`
+
+```typescript
+// true
+const Component: React.FC<ComponentProps> = ({...props}) => (
+  //...
+)
+
+// false
+const Component = ({...props}: ComponentProps) => (
+  //...
+)
+```
+
+#### "Declare With React FC" | "reactExtract.explicitReturnStatements"
+
+- **Description**: Whether to create the extracted component with explicit return statements or not. [Only takes effect if "Function Declaration" is set to "Arrow Function"].
+
+- **Accepts**: `"true" | "false"`
+
+- **Default**: `"false"`
+
+```typescript
+// true
+const Component: React.FC<ComponentProps> = ({...props}) => {
+  return (<Extracted />)
+}
+
+// false
+const Component = ({...props}: ComponentProps) => (<Extracted />)
+```
+
 ## Contributions
 
 If you encounter any problems or have suggestions for improvements, please open an issue. Your feedback and contribution is appreciated. If you have the agreed solution as well, please open a pull request.
