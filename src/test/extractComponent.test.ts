@@ -462,9 +462,15 @@ suite('buildExtractedComponent', function () {
 
   suite('builds the component as an arrow function with explicit return statement, if so configured', function () {
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(5, 4), new vscode.Position(8, 10));
+      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(7, 10));
       const { jsTest, jsResult } = await getDocuments('arrowFunctionExplicitReturn');
-      await buildExtractedComponent({ ...defaultArgs, functionDeclaration: 'arrow', document: jsTest, range });
+      await buildExtractedComponent({
+        ...defaultArgs,
+        functionDeclaration: 'arrow',
+        explicitReturnType: true,
+        document: jsTest,
+        range
+      });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });

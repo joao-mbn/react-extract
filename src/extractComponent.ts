@@ -167,7 +167,6 @@ function buildFunctionDeclaration(args: BuildArgs) {
 
   if (functionDeclarationType === 'arrow') {
     let functionArguments: string;
-
     if (declareWithReactFC) {
       functionArguments = isTypescript
         ? `: React.FC${shouldDisplayTypeDeclaration ? `<${typeDeclarationName}>` : ''} = (
@@ -183,10 +182,21 @@ function buildFunctionDeclaration(args: BuildArgs) {
       )`;
     }
 
-    return `
-      const ${componentName}${functionArguments} => (
+    let returnStatement: string;
+    if (explicitReturnType) {
+      returnStatement = `{
+        return (
+          ${functionReturn}
+        );
+      }`;
+    } else {
+      returnStatement = `(
         ${functionReturn}
-      );
+      );`;
+    }
+
+    return `
+      const ${componentName}${functionArguments} => ${returnStatement}
     `;
   } else {
     const functionArguments = `
