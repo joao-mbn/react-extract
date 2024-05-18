@@ -1,7 +1,7 @@
 import React from 'react';
 
 function Component() {
-  const myClass: string = 'my-class';
+  const myClass = 'my-class';
 
   return (
     <div className={myClass}>

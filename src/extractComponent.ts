@@ -74,7 +74,13 @@ function getFileConfigs() {
   const _typeDeclaration = config.get('typeDeclaration');
   const typeDeclaration: 'interface' | 'type' = _typeDeclaration === 'type' ? 'type' : 'interface';
 
-  return { functionDeclaration, typeDeclaration };
+  const _declareWithReactFC = config.get('declareWithReactFC');
+  const declareWithReactFC = _declareWithReactFC === 'true' && functionDeclaration === 'arrow';
+
+  const _explicitReturnType = config.get('explicitReturnType');
+  const explicitReturnType = _explicitReturnType === 'true' && functionDeclaration === 'arrow';
+
+  return { functionDeclaration, typeDeclaration, declareWithReactFC, explicitReturnType };
 }
 
 function getArgsDerivedFromExternalArgs(args: ExternalArgs): ArgsDerivedFromExternalArgs {
@@ -141,9 +147,12 @@ function buildTypeDeclaration(args: BuildArgs) {
 function buildFunctionDeclaration(args: BuildArgs) {
   const {
     componentName,
+    declareWithReactFC,
     document,
+    explicitReturnType,
     functionDeclaration: functionDeclarationType,
     hasSingleSpread,
+    isTypescript,
     props,
     range,
     shouldDisplayTypeDeclaration,
@@ -152,23 +161,38 @@ function buildFunctionDeclaration(args: BuildArgs) {
   } = args;
 
   const boundProps = props.map(({ name, isSpread }) => (isSpread && hasSingleSpread ? `...${name}` : name)).join(',\n');
-
-  const functionArguments = `
-    ${props.length > 0 ? `{ ${boundProps} }` : ''}
-    ${shouldDisplayTypeDeclaration ? `: ${typeDeclarationName}` : ''}
-  `;
+  const functionPropsAsString = `${props.length > 0 ? `{ ${boundProps} }` : ''}`;
 
   const functionReturn = shouldWrapInFragments ? `<>\n${document.getText(range)}\n</>` : document.getText(range);
 
   if (functionDeclarationType === 'arrow') {
+    let functionArguments: string;
+
+    if (declareWithReactFC) {
+      functionArguments = isTypescript
+        ? `: React.FC${shouldDisplayTypeDeclaration ? `<${typeDeclarationName}>` : ''} = (
+        ${functionPropsAsString}
+      )`
+        : ` = (
+          ${functionPropsAsString}
+        )`;
+    } else {
+      functionArguments = ` = (
+        ${functionPropsAsString}
+        ${shouldDisplayTypeDeclaration ? `: ${typeDeclarationName}` : ''}
+      )`;
+    }
+
     return `
-      const ${componentName} = (
-        ${functionArguments}
-      ) => (
+      const ${componentName}${functionArguments} => (
         ${functionReturn}
       );
     `;
   } else {
+    const functionArguments = `
+      ${functionPropsAsString}
+      ${shouldDisplayTypeDeclaration ? `: ${typeDeclarationName}` : ''}
+    `;
     return `
       function ${componentName}(
         ${functionArguments}
@@ -193,3 +217,4 @@ function buildComponentInstance(args: BuildArgs) {
     />
   `;
 }
+
