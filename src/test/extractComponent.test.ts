@@ -455,6 +455,39 @@ suite('buildExtractedComponent', function () {
     }
   );
 
+  suite('builds the component as an arrow function with explicit return statement, if so configured', function () {
+    test('with javascript', async function () {
+      const range = new vscode.Range(new vscode.Position(5, 4), new vscode.Position(8, 10));
+      const { jsTest, jsResult } = await getDocuments('arrowFunctionExplicitReturn');
+      await buildExtractedComponent({ ...defaultArgs, functionDeclaration: 'arrow', document: jsTest, range });
+      assertExtraction(jsResult.getText(), jsTest.getText());
+    });
+  });
+
+  suite(
+    'builds the component as an arrow function, declaring using React.FC with props type, if so configured',
+    function () {
+      test('with typescript', async function () {
+        const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(9, 10));
+        const { jsTest, jsResult } = await getDocuments('reactFCType');
+        await buildExtractedComponent({ ...defaultArgs, functionDeclaration: 'arrow', document: jsTest, range });
+        assertExtraction(jsResult.getText(), jsTest.getText());
+      });
+    }
+  );
+
+  suite(
+    'builds the component as an arrow function, declaring using React.FC without props type, if so configured',
+    function () {
+      test('with typescript', async function () {
+        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(7, 10));
+        const { jsTest, jsResult } = await getDocuments('reactFCTypeEmpty');
+        await buildExtractedComponent({ ...defaultArgs, functionDeclaration: 'arrow', document: jsTest, range });
+        assertExtraction(jsResult.getText(), jsTest.getText());
+      });
+    }
+  );
+
   suite('extracts a component wrapping it in fragments if necessary', function () {
     test('with typescript', async function () {
       const range = new vscode.Range(new vscode.Position(5, 6), new vscode.Position(7, 21));
