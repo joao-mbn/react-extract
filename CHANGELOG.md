@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+## [0.8.0] - 2024-05-18
+
+### Added
+
+- Configuration option for declaring component using React.FC
+- Configuration option for declaring arrow functions with explicit return statement.
+
 ## [0.7.4] - 2024-04-23
 
 ### Fixed

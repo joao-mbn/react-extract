@@ -13,6 +13,8 @@ export type ExternalArgs = {
   componentName: string;
   functionDeclaration: 'function' | 'arrow';
   typeDeclaration: 'interface' | 'type';
+  declareWithReactFC: boolean;
+  explicitReturnType: boolean;
 };
 
 export type ArgsDerivedFromExternalArgs = {
@@ -40,3 +42,4 @@ type SingleSpread =
     };
 
 export type BuildArgs = ExtractionArgs & PropsAndDerivedData & { shouldWrapInFragments: boolean };
+

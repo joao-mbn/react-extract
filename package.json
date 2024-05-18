@@ -3,7 +3,7 @@
   "displayName": "React Extract",
   "description": "Extract a valid piece of JSX code into a new function, passing props and creating its interface.",
   "publisher": "joao-mbn",
-  "version": "0.7.4",
+  "version": "0.8.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/joao-mbn/react-extract"
@@ -53,24 +53,6 @@
     "configuration": {
       "title": "React Extract",
       "properties": {
-        "reactExtract.functionDeclaration": {
-          "title": "Function Declaration",
-          "enum": [
-            "arrow",
-            "function"
-          ],
-          "enumItemLabels": [
-            "Arrow Function",
-            "Named Function"
-          ],
-          "enumDescriptions": [
-            "const Component () => (\n //...\n)",
-            "function Component() {\n //...\n}"
-          ],
-          "type": "string",
-          "default": "function",
-          "description": "The type of function declaration to be used when extracting the component."
-        },
         "reactExtract.typeDeclaration": {
           "title": "Type Declaration",
           "enum": [
@@ -87,7 +69,65 @@
           ],
           "type": "string",
           "default": "interface",
-          "description": "The type of type declaration to be used when extracting the component."
+          "description": "The type of type declaration to be used when extracting the component.",
+          "order": 1
+        },
+        "reactExtract.functionDeclaration": {
+          "title": "Function Declaration",
+          "enum": [
+            "arrow",
+            "function"
+          ],
+          "enumItemLabels": [
+            "Arrow Function",
+            "Named Function"
+          ],
+          "enumDescriptions": [
+            "const Component () => (\n //...\n)",
+            "function Component() {\n //...\n}"
+          ],
+          "type": "string",
+          "default": "function",
+          "description": "The type of function declaration to be used when extracting the component.",
+          "order": 2
+        },
+        "reactExtract.declareWithReactFC": {
+          "title": "Declare component using React.FC",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "enumItemLabels": [
+            "true",
+            "false"
+          ],
+          "enumDescriptions": [
+            "const Component: React.FC<ComponentProps> = ({...props}) => (\n //...\n)",
+            "const Component = ({...props}: ComponentProps) => (\n //...\n)"
+          ],
+          "type": "string",
+          "default": "false",
+          "description": "Whether to declare the component using React.FC or not. \n[Only takes effect if \"Function Declaration\" is set to \"Arrow Function\"].",
+          "order": 3
+        },
+        "reactExtract.explicitReturnStatements": {
+          "title": "Create extracted component with explicit return statement",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "enumItemLabels": [
+            "true",
+            "false"
+          ],
+          "markdownEnumDescriptions": [
+            "const Component = () => { return (<Extracted />) }",
+            "const Component = () => (<Extracted />)"
+          ],
+          "type": "string",
+          "default": "false",
+          "description": "Whether to create the extracted component with explicit return statement or not. \n[Only takes effect if \"Function Declaration\" is set to \"Arrow Function\"].",
+          "order": 4
         }
       }
     }
