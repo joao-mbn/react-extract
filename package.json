@@ -111,7 +111,7 @@
           "order": 3
         },
         "reactExtract.explicitReturnStatements": {
-          "title": "Create extracted component with explicit return statements",
+          "title": "Create extracted component with explicit return statement",
           "enum": [
             "true",
             "false"
@@ -126,7 +126,7 @@
           ],
           "type": "string",
           "default": "false",
-          "description": "Whether to create the extracted component with explicit return statements or not. \n[Only takes effect if \"Function Declaration\" is set to \"Arrow Function\"].",
+          "description": "Whether to create the extracted component with explicit return statement or not. \n[Only takes effect if \"Function Declaration\" is set to \"Arrow Function\"].",
           "order": 4
         }
       }
