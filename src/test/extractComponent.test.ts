@@ -49,12 +49,12 @@ async function getDocuments(folder: string) {
 suite('buildExtractedComponent', function () {
   const defaultArgs: Pick<
     ExtractionArgs,
-    'componentName' | 'functionDeclaration' | 'typeDeclaration' | 'declareWithReactFC' | 'explicitReturnType'
+    'componentName' | 'functionDeclaration' | 'typeDeclaration' | 'declareWithReactFC' | 'explicitReturnStatement'
   > = {
     componentName: 'Extracted',
     functionDeclaration: 'function',
     typeDeclaration: 'interface',
-    explicitReturnType: false,
+    explicitReturnStatement: false,
     declareWithReactFC: false
   };
 
@@ -467,7 +467,7 @@ suite('buildExtractedComponent', function () {
       await buildExtractedComponent({
         ...defaultArgs,
         functionDeclaration: 'arrow',
-        explicitReturnType: true,
+        explicitReturnStatement: true,
         document: jsTest,
         range
       });

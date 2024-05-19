@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+## [0.8.1] - 2024-05-18
+
+### Fixed
+
+- Mismatch between explicitReturnStatement config property name and searched key.
+
 ## [0.8.0] - 2024-05-18
 
 ### Added

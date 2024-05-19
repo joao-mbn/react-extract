@@ -77,10 +77,10 @@ function getFileConfigs() {
   const _declareWithReactFC = config.get('declareWithReactFC');
   const declareWithReactFC = _declareWithReactFC === 'true' && functionDeclaration === 'arrow';
 
-  const _explicitReturnType = config.get('explicitReturnType');
-  const explicitReturnType = _explicitReturnType === 'true' && functionDeclaration === 'arrow';
+  const _explicitReturnStatement = config.get('explicitReturnStatement');
+  const explicitReturnStatement = _explicitReturnStatement === 'true' && functionDeclaration === 'arrow';
 
-  return { functionDeclaration, typeDeclaration, declareWithReactFC, explicitReturnType };
+  return { functionDeclaration, typeDeclaration, declareWithReactFC, explicitReturnStatement };
 }
 
 function getArgsDerivedFromExternalArgs(args: ExternalArgs): ArgsDerivedFromExternalArgs {
@@ -149,7 +149,7 @@ function buildFunctionDeclaration(args: BuildArgs) {
     componentName,
     declareWithReactFC,
     document,
-    explicitReturnType,
+    explicitReturnStatement,
     functionDeclaration: functionDeclarationType,
     hasSingleSpread,
     isTypescript,
@@ -183,7 +183,7 @@ function buildFunctionDeclaration(args: BuildArgs) {
     }
 
     let returnStatement: string;
-    if (explicitReturnType) {
+    if (explicitReturnStatement) {
       returnStatement = `{
         return (
           ${functionReturn}

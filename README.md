@@ -90,7 +90,7 @@ const Component = ({...props}: ComponentProps) => (
 )
 ```
 
-#### "Declare With React FC" | "reactExtract.explicitReturnStatements"
+#### "Explicit Return Statement" | "reactExtract.explicitReturnStatement"
 
 - **Description**: Whether to create the extracted component with explicit return statement or not. [Only takes effect if "Function Declaration" is set to "Arrow Function"].
 

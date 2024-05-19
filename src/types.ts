@@ -14,7 +14,7 @@ export type ExternalArgs = {
   functionDeclaration: 'function' | 'arrow';
   typeDeclaration: 'interface' | 'type';
   declareWithReactFC: boolean;
-  explicitReturnType: boolean;
+  explicitReturnStatement: boolean;
 };
 
 export type ArgsDerivedFromExternalArgs = {

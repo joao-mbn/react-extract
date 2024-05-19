@@ -110,7 +110,7 @@
           "description": "Whether to declare the component using React.FC or not. \n[Only takes effect if \"Function Declaration\" is set to \"Arrow Function\"].",
           "order": 3
         },
-        "reactExtract.explicitReturnStatements": {
+        "reactExtract.explicitReturnStatement": {
           "title": "Create extracted component with explicit return statement",
           "enum": [
             "true",
@@ -170,3 +170,4 @@
     "typescript": "^5.3.3"
   }
 }
+
