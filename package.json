@@ -57,15 +57,18 @@
           "title": "Type Declaration",
           "enum": [
             "interface",
-            "type"
+            "type",
+            "inline"
           ],
           "enumItemLabels": [
             "Interface",
-            "Type"
+            "Type",
+            "Inline"
           ],
           "enumDescriptions": [
             "interface ComponentProps {\n //...\n}",
-            "type ComponentProps = {\n //...\n}"
+            "type ComponentProps = {\n //...\n}",
+            "function Component(props: { onClick: () => void; value: number; options: number[] }) {\n //...\n}"
           ],
           "type": "string",
           "default": "interface",
@@ -110,6 +113,25 @@
           "description": "Whether to declare the component using React.FC or not. \n[Only takes effect if \"Function Declaration\" is set to \"Arrow Function\"].",
           "order": 3
         },
+        "reactExtract.destructureProps": {
+          "title": "Create extracted component destructuring props parameter",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "enumItemLabels": [
+            "true",
+            "false"
+          ],
+          "enumDescriptions": [
+            "function Component ({ onClick, className }: ComponentProps) {\n  return (<ChildComponent onClick={onClick} className={className}>) \n}",
+            "function Component (props: ComponentProps) {\n  return (<ChildComponent onClick={props.onClick} className={props.className}>) \n}"
+          ],
+          "type": "string",
+          "default": "true",
+          "description": "Whether to do object destructure in the extracted component props parameter or not. If set to \"false\", the parameter will be named \"props\".",
+          "order": 4
+        },
         "reactExtract.explicitReturnStatement": {
           "title": "Create extracted component with explicit return statement",
           "enum": [
@@ -120,14 +142,14 @@
             "true",
             "false"
           ],
-          "markdownEnumDescriptions": [
+          "enumDescriptions": [
             "const Component = () => { return (<Extracted />) }",
             "const Component = () => (<Extracted />)"
           ],
           "type": "string",
           "default": "false",
           "description": "Whether to create the extracted component with explicit return statement or not. \n[Only takes effect if \"Function Declaration\" is set to \"Arrow Function\"].",
-          "order": 4
+          "order": 5
         }
       }
     }
@@ -170,3 +192,4 @@
     "typescript": "^5.3.3"
   }
 }
+

@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+### Added
+
+- Configuration option for inline props type declaration.
+- Configuration option for keeping props undestructured.
+
+### Fixed
+
+- Description for "Explicit Return Statement" configuration.
+
 ## [0.8.1] - 2024-05-18
 
 ### Fixed

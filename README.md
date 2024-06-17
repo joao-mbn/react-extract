@@ -34,7 +34,7 @@ You may customize the way that the extracted component is built, with the follow
 
 - **Description**: The type of type declaration to be used when extracting the component.
 
-- **Accepts**: `"interface" | "type"`
+- **Accepts**: `"interface" | "type" | "inline"`
 
 - **Default**: `"interface"`
 
@@ -48,6 +48,11 @@ interface ComponentProps {
 type ComponentProps = {
   // ...
 };
+
+// inline
+function Component(props: { onClick: () => void; value: number; options: number[] }) {
+  // ...
+}
 ```
 
 #### "Function Declaration" | "reactExtract.functionDeclaration"
@@ -88,6 +93,26 @@ const Component: React.FC<ComponentProps> = ({...props}) => (
 const Component = ({...props}: ComponentProps) => (
   //...
 )
+```
+
+#### "Destructure Props" | "reactExtract.destructureProps"
+
+- **Description**: Whether to do object destructure in the extracted component props parameter or not. If set to "false", the parameter will be named "props".
+
+- **Accepts**: `"true" | "false"`
+
+- **Default**: `"true"`
+
+```typescript
+// true
+function Component ({ onClick, className }: ComponentProps) {
+  return (<ChildComponent onClick={onClick} className={className}>)
+}
+
+// false
+function Component (props: ComponentProps) {
+  return (<ChildComponent onClick={props.onClick} className={props.className}>)
+}
 ```
 
 #### "Explicit Return Statement" | "reactExtract.explicitReturnStatement"

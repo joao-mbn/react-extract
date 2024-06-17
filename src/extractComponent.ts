@@ -72,15 +72,21 @@ function getFileConfigs() {
   const functionDeclaration: 'arrow' | 'function' = _functionDeclaration === 'arrow' ? 'arrow' : 'function';
 
   const _typeDeclaration = config.get('typeDeclaration');
-  const typeDeclaration: 'interface' | 'type' = _typeDeclaration === 'type' ? 'type' : 'interface';
+  const typeDeclaration =
+    typeof _typeDeclaration === 'string' && ['interface', 'type', 'inline'].includes(_typeDeclaration)
+      ? (_typeDeclaration as 'type' | 'inline' | 'interface')
+      : 'interface';
 
   const _declareWithReactFC = config.get('declareWithReactFC');
   const declareWithReactFC = _declareWithReactFC === 'true' && functionDeclaration === 'arrow';
 
+  const _destructureProps = config.get('destructureProps');
+  const destructureProps = _destructureProps !== 'false';
+
   const _explicitReturnStatement = config.get('explicitReturnStatement');
   const explicitReturnStatement = _explicitReturnStatement === 'true' && functionDeclaration === 'arrow';
 
-  return { functionDeclaration, typeDeclaration, declareWithReactFC, explicitReturnStatement };
+  return { functionDeclaration, typeDeclaration, declareWithReactFC, explicitReturnStatement, destructureProps };
 }
 
 function getArgsDerivedFromExternalArgs(args: ExternalArgs): ArgsDerivedFromExternalArgs {

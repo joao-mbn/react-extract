@@ -12,9 +12,10 @@ export type ExternalArgs = {
   range: vscode.Range | vscode.Selection;
   componentName: string;
   functionDeclaration: 'function' | 'arrow';
-  typeDeclaration: 'interface' | 'type';
+  typeDeclaration: 'interface' | 'type' | 'inline';
   declareWithReactFC: boolean;
   explicitReturnStatement: boolean;
+  destructureProps: boolean;
 };
 
 export type ArgsDerivedFromExternalArgs = {

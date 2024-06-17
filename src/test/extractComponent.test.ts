@@ -49,13 +49,19 @@ async function getDocuments(folder: string) {
 suite('buildExtractedComponent', function () {
   const defaultArgs: Pick<
     ExtractionArgs,
-    'componentName' | 'functionDeclaration' | 'typeDeclaration' | 'declareWithReactFC' | 'explicitReturnStatement'
+    | 'componentName'
+    | 'functionDeclaration'
+    | 'typeDeclaration'
+    | 'declareWithReactFC'
+    | 'explicitReturnStatement'
+    | 'destructureProps'
   > = {
     componentName: 'Extracted',
     functionDeclaration: 'function',
     typeDeclaration: 'interface',
     explicitReturnStatement: false,
-    declareWithReactFC: false
+    declareWithReactFC: false,
+    destructureProps: true
   };
 
   suite('extracts a nested component without any props', function () {
