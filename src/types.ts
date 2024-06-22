@@ -42,5 +42,10 @@ type SingleSpread =
       singleSpreadType: undefined;
     };
 
-export type BuildArgs = ExtractionArgs & PropsAndDerivedData & { shouldWrapInFragments: boolean };
+export type TypeDeclarationInfo = {
+  typeDeclarationBody: string;
+  typeDeclarationReference: string;
+};
+
+export type BuildArgs = ExtractionArgs & PropsAndDerivedData & TypeDeclarationInfo & { shouldWrapInFragments: boolean };
 

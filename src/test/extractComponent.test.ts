@@ -404,6 +404,49 @@ suite('buildExtractedComponent', function () {
     });
   });
 
+  suite('builds type as inline declaration if so configured', function () {
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(7, 4), new vscode.Position(9, 10));
+      const { tsTest, tsResult } = await getDocuments('typeInlineDeclaration');
+      await buildExtractedComponent({ ...defaultArgs, typeDeclaration: 'inline', document: tsTest, range });
+      assertExtraction(tsResult.getText(), tsTest.getText());
+    });
+  });
+
+  suite('builds no type as inline declaration if there are no props', function () {
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
+      const { tsTest, tsResult } = await getDocuments('typeInlineDeclarationEmpty');
+      await buildExtractedComponent({ ...defaultArgs, typeDeclaration: 'inline', document: tsTest, range });
+      assertExtraction(tsResult.getText(), tsTest.getText());
+    });
+  });
+
+  suite('builds type as inline declaration if so configured, with type extension', function () {
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(9, 10));
+      const { tsTest, tsResult } = await getDocuments('typeInlineDeclarationExtended');
+      await buildExtractedComponent({ ...defaultArgs, typeDeclaration: 'inline', document: tsTest, range });
+      assertExtraction(tsResult.getText(), tsTest.getText());
+    });
+  });
+
+  suite('builds type as inline declaration if so configured, with ReactFC type declaration', function () {
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(7, 4), new vscode.Position(9, 10));
+      const { tsTest, tsResult } = await getDocuments('typeInlineDeclarationReactFC');
+      await buildExtractedComponent({
+        ...defaultArgs,
+        functionDeclaration: 'arrow',
+        declareWithReactFC: true,
+        typeDeclaration: 'inline',
+        document: tsTest,
+        range
+      });
+      assertExtraction(tsResult.getText(), tsTest.getText());
+    });
+  });
+
   suite('builds type as type declaration if so configured', function () {
     test('with typescript', async function () {
       const range = new vscode.Range(new vscode.Position(7, 4), new vscode.Position(9, 10));
@@ -413,7 +456,7 @@ suite('buildExtractedComponent', function () {
     });
   });
 
-  suite('builds no type as type declaration if there is are props', function () {
+  suite('builds no type as type declaration if there are no props', function () {
     test('with typescript', async function () {
       const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
       const { tsTest, tsResult } = await getDocuments('typeTypeDeclarationEmpty');

@@ -25,21 +25,14 @@ export async function buildExtractedComponent(externalArgs: ExternalArgs) {
   const extractionArgs = { ...externalArgs, ...argsDerivedFromExternalArgs };
 
   const shouldWrapInFragments = determineIfShouldWrapInFragments(extractionArgs);
-
   const propsAndDerivedData = getPropsAndPropsDerivedData(extractionArgs);
-  const { shouldDisplayTypeDeclaration } = propsAndDerivedData;
+  const typeDeclarationInfo = getTypeDeclarationBodyAndReference({ ...extractionArgs, ...propsAndDerivedData });
 
-  const buildArgs = { ...extractionArgs, ...propsAndDerivedData, shouldWrapInFragments };
+  const buildArgs = { ...extractionArgs, ...propsAndDerivedData, ...typeDeclarationInfo, shouldWrapInFragments };
 
   const editor = await vscode.window.showTextDocument(document);
   await editor.edit((editBuilder) => {
-    const typeDeclaration = shouldDisplayTypeDeclaration ? buildTypeDeclaration(buildArgs) : '';
-    const functionDeclaration = buildFunctionDeclaration(buildArgs);
-
-    const extractedComponent = `
-      ${typeDeclaration}\n
-      ${functionDeclaration}
-    `;
+    const extractedComponent = buildFunctionDeclarationWithType(buildArgs);
 
     const lastLine = document.lineAt(document.lineCount - 1);
     const endOfDocument = new vscode.Position(lastLine.lineNumber, lastLine.text.length);
@@ -128,95 +121,130 @@ function getPropsAndPropsDerivedData(args: ExtractionArgs): PropsAndDerivedData 
   };
 }
 
-function buildTypeDeclaration(args: BuildArgs) {
-  const { hasSingleSpread, props, singleSpreadType, typeDeclaration: typeDeclarationType, typeDeclarationName } = args;
+function getTypeDeclarationBodyAndReference(args: ExtractionArgs & PropsAndDerivedData) {
+  const { typeDeclaration: typeDeclarationType, typeDeclarationName } = args;
+  const typeDeclaration = buildTypeDeclaration(args);
+  const typeDeclarationBody = typeDeclarationType === 'inline' ? '' : typeDeclaration;
+  const typeDeclarationReference = typeDeclarationType === 'inline' ? typeDeclaration : typeDeclarationName;
+
+  return { typeDeclarationBody, typeDeclarationReference };
+}
+
+function buildTypeDeclaration(args: ExtractionArgs & PropsAndDerivedData) {
+  const {
+    hasSingleSpread,
+    props,
+    singleSpreadType,
+    typeDeclaration: typeDeclarationType,
+    typeDeclarationName,
+    shouldDisplayTypeDeclaration
+  } = args;
+
+  if (!shouldDisplayTypeDeclaration) return '';
 
   const propsToDeclare = props.filter(({ isSpread }) => !hasSingleSpread || (hasSingleSpread && !isSpread));
   const declaredProps =
     propsToDeclare.map(({ name, type }) => `${name}: ${type}`).join(';\n') + (propsToDeclare.length > 0 ? ';' : '');
 
-  if (typeDeclarationType === 'type') {
-    return `\n
-      type ${typeDeclarationName} = ${singleSpreadType ? `${singleSpreadType} & ` : ''} {
-        ${declaredProps}
-      };\n
+  switch (typeDeclarationType) {
+    case 'type':
+      return `\n
+        type ${typeDeclarationName} = ${singleSpreadType ? `${singleSpreadType} & ` : ''} {
+          ${declaredProps}
+        };\n
+      `;
+    case 'inline':
+      return `${singleSpreadType ? `${singleSpreadType} & ` : ''} { ${declaredProps} }`;
+    case 'interface':
+      return `\n
+        interface ${typeDeclarationName} ${singleSpreadType ? `extends ${singleSpreadType}` : ''} {
+          ${declaredProps}
+        }\n
+      `;
+  }
+}
+
+function buildFunctionDeclarationWithType(args: BuildArgs) {
+  const { componentName, functionDeclaration: functionDeclarationType, typeDeclarationBody } = args;
+
+  const functionArguments = buildFunctionArguments(args);
+  const functionArgumentsType = buildFunctionArgumentsType(args);
+  const body = buildFunctionBody(args);
+
+  if (functionDeclarationType === 'arrow') {
+    const explicitType = buildFunctionExplicitType(args);
+    return `
+      ${typeDeclarationBody}
+      const ${componentName}${explicitType} = (${functionArguments}${functionArgumentsType}) => ${body}
     `;
   } else {
-    return `\n
-      interface ${typeDeclarationName} ${singleSpreadType ? `extends ${singleSpreadType}` : ''} {
-        ${declaredProps}
-      }\n
+    return `
+      ${typeDeclarationBody}
+      function ${componentName}(${functionArguments}${functionArgumentsType}) ${body}
     `;
   }
 }
 
-function buildFunctionDeclaration(args: BuildArgs) {
+function buildFunctionArgumentsType(args: BuildArgs) {
   const {
-    componentName,
+    functionDeclaration: functionDeclarationType,
     declareWithReactFC,
+    shouldDisplayTypeDeclaration,
+    typeDeclarationReference
+  } = args;
+
+  if (!shouldDisplayTypeDeclaration) return '';
+
+  if (functionDeclarationType === 'arrow' && declareWithReactFC) return '';
+
+  return `: ${typeDeclarationReference}`;
+}
+
+function buildFunctionArguments(args: BuildArgs) {
+  const { props, hasSingleSpread } = args;
+
+  const boundProps = props.map(({ name, isSpread }) => (isSpread && hasSingleSpread ? `...${name}` : name)).join(',\n');
+  const functionArguments = `${props.length > 0 ? `{ ${boundProps} }` : ''}`;
+  return functionArguments;
+}
+
+function buildFunctionExplicitType(args: BuildArgs) {
+  const {
+    functionDeclaration,
+    declareWithReactFC,
+    shouldDisplayTypeDeclaration,
+    typeDeclarationReference,
+    isTypescript
+  } = args;
+
+  if (isTypescript && functionDeclaration === 'arrow' && declareWithReactFC) {
+    return `: React.FC${shouldDisplayTypeDeclaration ? `<${typeDeclarationReference}>` : ''}`;
+  } else {
+    return '';
+  }
+}
+
+function buildFunctionBody(args: BuildArgs) {
+  const {
     document,
     explicitReturnStatement,
     functionDeclaration: functionDeclarationType,
-    hasSingleSpread,
-    isTypescript,
-    props,
     range,
-    shouldDisplayTypeDeclaration,
-    shouldWrapInFragments,
-    typeDeclarationName
+    shouldWrapInFragments
   } = args;
-
-  const boundProps = props.map(({ name, isSpread }) => (isSpread && hasSingleSpread ? `...${name}` : name)).join(',\n');
-  const functionPropsAsString = `${props.length > 0 ? `{ ${boundProps} }` : ''}`;
 
   const functionReturn = shouldWrapInFragments ? `<>\n${document.getText(range)}\n</>` : document.getText(range);
 
-  if (functionDeclarationType === 'arrow') {
-    let functionArguments: string;
-    if (declareWithReactFC) {
-      functionArguments = isTypescript
-        ? `: React.FC${shouldDisplayTypeDeclaration ? `<${typeDeclarationName}>` : ''} = (
-        ${functionPropsAsString}
-      )`
-        : ` = (
-          ${functionPropsAsString}
-        )`;
-    } else {
-      functionArguments = ` = (
-        ${functionPropsAsString}
-        ${shouldDisplayTypeDeclaration ? `: ${typeDeclarationName}` : ''}
-      )`;
-    }
-
-    let returnStatement: string;
-    if (explicitReturnStatement) {
-      returnStatement = `{
-        return (
-          ${functionReturn}
-        );
-      }`;
-    } else {
-      returnStatement = `(
-        ${functionReturn}
-      );`;
-    }
-
-    return `
-      const ${componentName}${functionArguments} => ${returnStatement}
-    `;
+  if (functionDeclarationType === 'arrow' && !explicitReturnStatement) {
+    return `(
+      ${functionReturn}
+    );`;
   } else {
-    const functionArguments = `
-      ${functionPropsAsString}
-      ${shouldDisplayTypeDeclaration ? `: ${typeDeclarationName}` : ''}
-    `;
-    return `
-      function ${componentName}(
-        ${functionArguments}
-      ) {
-        return (
-          ${functionReturn}
-        );
-      }`;
+    return `{
+      return (
+        ${functionReturn}
+      );
+    }`;
   }
 }
 
