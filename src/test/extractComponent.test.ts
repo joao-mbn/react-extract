@@ -588,5 +588,78 @@ suite('buildExtractedComponent', function () {
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });
+
+  suite('extracts a component with undestructured props, if so configured', function () {
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(7, 4), new vscode.Position(9, 10));
+      const { tsTest, tsResult } = await getDocuments('undestructuredProps');
+      await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: tsTest, range });
+      assertExtraction(tsResult.getText(), tsTest.getText());
+    });
+
+    test('with javascript', async function () {
+      const range = new vscode.Range(new vscode.Position(7, 4), new vscode.Position(9, 10));
+      const { jsTest, jsResult } = await getDocuments('undestructuredProps');
+      await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: jsTest, range });
+      assertExtraction(jsResult.getText(), jsTest.getText());
+    });
+  });
+
+  suite(
+    'extracts a component with no props, if it does not have any, despite being configured as undestructured props',
+    function () {
+      test('with typescript', async function () {
+        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
+        const { tsTest, tsResult } = await getDocuments('undestructuredPropsEmpty');
+        await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: tsTest, range });
+        assertExtraction(tsResult.getText(), tsTest.getText());
+      });
+
+      test('with javascript', async function () {
+        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
+        const { jsTest, jsResult } = await getDocuments('undestructuredPropsEmpty');
+        await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: jsTest, range });
+        assertExtraction(jsResult.getText(), jsTest.getText());
+      });
+    }
+  );
+
+  suite(
+    'extracts a component with undestructured props, if so configured, when there is a spread assignment',
+    function () {
+      test('with typescript', async function () {
+        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(7, 10));
+        const { tsTest, tsResult } = await getDocuments('undestructuredPropsSpreadAssignment');
+        await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: tsTest, range });
+        assertExtraction(tsResult.getText(), tsTest.getText());
+      });
+
+      test('with javascript', async function () {
+        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(7, 10));
+        const { jsTest, jsResult } = await getDocuments('undestructuredPropsSpreadAssignment');
+        await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: jsTest, range });
+        assertExtraction(jsResult.getText(), jsTest.getText());
+      });
+    }
+  );
+
+  suite(
+    'extracts a component with destructured props, even if it is configured as undestructured props, if there are any spread attribute',
+    function () {
+      test('with typescript', async function () {
+        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
+        const { tsTest, tsResult } = await getDocuments('undestructuredPropsSpreadAttribute');
+        await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: tsTest, range });
+        assertExtraction(tsResult.getText(), tsTest.getText());
+      });
+
+      test('with javascript', async function () {
+        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
+        const { jsTest, jsResult } = await getDocuments('undestructuredPropsSpreadAttribute');
+        await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: jsTest, range });
+        assertExtraction(jsResult.getText(), jsTest.getText());
+      });
+    }
+  );
 });
 

@@ -1,5 +1,11 @@
 import * as assert from 'assert';
-import { capitalizeComponentName, chooseAdequateType, removeNonWordCharacters, truncateType } from '../utils';
+import {
+  capitalizeComponentName,
+  chooseAdequateType,
+  removeNonWordCharacters,
+  replacePropValues,
+  truncateType
+} from '../utils';
 
 suite('removeNonWordCharacters', function () {
   test('should remove non-word characters from the string', function () {
@@ -126,3 +132,90 @@ suite('chooseAdequateType', function () {
     assert.strictEqual(result, expected);
   });
 });
+
+suite('replacePropValues', function () {
+  test('should replace prop values in the jsx', function () {
+    const prop = 'myClass';
+    const jsx = `<Component className={myClass} />`;
+    const expected = `<Component className={props.myClass} />`;
+    const result = replacePropValues(prop, jsx);
+    assert.strictEqual(result, expected);
+  });
+
+  test('should replace prop values, but not prop name in the jsx', function () {
+    const prop = 'myClass';
+    const jsx = `<Component myClass={myClass} />`;
+    const expected = `<Component myClass={props.myClass} />`;
+    const result = replacePropValues(prop, jsx);
+    assert.strictEqual(result, expected);
+  });
+
+  test('should not replace prop values that are different', function () {
+    const prop = 'myClass';
+    const jsx = `<Component myClass={myClass1} myClass={mmyClass} />`;
+    const expected = `<Component myClass={myClass1} myClass={mmyClass} />`;
+    const result = replacePropValues(prop, jsx);
+    assert.strictEqual(result, expected);
+  });
+
+  test('should replace composed prop values', function () {
+    const prop = 'myClass';
+    const jsx = `
+      <Component
+        myClass={
+          myClass + 'value'
+        }
+      />
+    `;
+    const expected = `
+      <Component
+        myClass={
+          props.myClass + 'value'
+        }
+      />
+    `;
+    const result = replacePropValues(prop, jsx);
+    assert.strictEqual(result, expected);
+  });
+
+  test('should replace prop values that are spread assignments', function () {
+    const prop = 'myClass';
+    const jsx = `
+      <Component
+        myProp={
+          ...myClass,
+        }
+      />
+    `;
+    const expected = `
+      <Component
+        myProp={
+          ...props.myClass,
+        }
+      />
+    `;
+    const result = replacePropValues(prop, jsx);
+    assert.strictEqual(result, expected);
+  });
+
+  test('should replace prop values in spread assignments and object properties', function () {
+    const prop = 'myClass';
+    const jsx = `
+      <div>
+        <Child values={[...myClass, myClass]} values={[ myClass, myClass1 ]} values={[...myClass]} />
+        <div style={{ ...myClass }}>{myClass}</div>
+        <input style={{ myClass: myClass, anotherClass: myClass, ...myClass, myClassToo: myClass1, myClassToo: myClass }} />
+      </div>
+    `;
+    const expected = `
+      <div>
+        <Child values={[...props.myClass, props.myClass]} values={[ props.myClass, myClass1 ]} values={[...props.myClass]} />
+        <div style={{ ...props.myClass }}>{props.myClass}</div>
+        <input style={{ myClass: props.myClass, anotherClass: props.myClass, ...props.myClass, myClassToo: myClass1, myClassToo: props.myClass }} />
+      </div>
+    `;
+    const result = replacePropValues(prop, jsx);
+    assert.strictEqual(result, expected);
+  });
+});
+

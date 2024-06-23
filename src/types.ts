@@ -30,6 +30,7 @@ export type ExtractionArgs = ExternalArgs & ArgsDerivedFromExternalArgs;
 export type PropsAndDerivedData = SingleSpread & {
   props: ExtractedProp[];
   shouldDisplayTypeDeclaration: boolean;
+  shouldDestructureProps: boolean;
 };
 
 type SingleSpread =

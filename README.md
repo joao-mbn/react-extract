@@ -103,15 +103,43 @@ const Component = ({...props}: ComponentProps) => (
 
 - **Default**: `"true"`
 
-```typescript
+```tsx
 // true
-function Component ({ onClick, className }: ComponentProps) {
-  return (<ChildComponent onClick={onClick} className={className}>)
+function Component({ onClick, className }: ComponentProps) {
+  return <ChildComponent onClick={onClick} className={className} />;
 }
 
 // false
-function Component (props: ComponentProps) {
-  return (<ChildComponent onClick={props.onClick} className={props.className}>)
+function Component(props: ComponentProps) {
+  return <ChildComponent onClick={props.onClick} className={props.className} />;
+}
+```
+
+_Note: If Destructure Props is set to false, but one of the props is a spread, props will be passed as destructured. Example:_
+
+```jsx
+// Before extraction
+function Parent() {
+  const childProps = {
+    className: 'myClass',
+    onClick: () => console.log('Clicked!')
+  };
+
+  return <div {...childProps}>Child Component</div>;
+}
+
+// After extraction
+function Parent() {
+  const childProps = {
+    className: 'myClass',
+    onClick: () => console.log('Clicked!')
+  };
+
+  return <Child {...childProps} />;
+}
+
+function Child({ ...childProps }) {
+  return <div {...childProps}>Child Component</div>;
 }
 ```
 
@@ -123,14 +151,14 @@ function Component (props: ComponentProps) {
 
 - **Default**: `"false"`
 
-```typescript
+```tsx
 // true
-const Component: React.FC<ComponentProps> = ({...props}) => {
-  return (<Extracted />)
-}
+const Component: React.FC<ComponentProps> = ({ ...props }) => {
+  return <Extracted />;
+};
 
 // false
-const Component = ({...props}: ComponentProps) => (<Extracted />)
+const Component = ({ ...props }: ComponentProps) => <Extracted />;
 ```
 
 ## Contributions

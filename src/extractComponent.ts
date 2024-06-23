@@ -4,7 +4,7 @@ import { extractProps } from './parsers/extractProps';
 import { determineIfShouldWrapInFragments } from './parsers/fragment';
 import { ArgsDerivedFromExternalArgs, BuildArgs, ExternalArgs, ExtractionArgs, PropsAndDerivedData } from './types';
 import { getProgramAndSourceFile } from './typescriptProgram';
-import { capitalizeComponentName, removeNonWordCharacters } from './utils';
+import { capitalizeComponentName, removeNonWordCharacters, replacePropValues } from './utils';
 
 export async function extractComponent(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
   const componentName = await getComponentName();
@@ -98,7 +98,7 @@ function getArgsDerivedFromExternalArgs(args: ExternalArgs): ArgsDerivedFromExte
 }
 
 function getPropsAndPropsDerivedData(args: ExtractionArgs): PropsAndDerivedData {
-  const { isTypescript } = args;
+  const { isTypescript, destructureProps } = args;
 
   const props = extractProps(args).sort((a, b) => {
     if (a.isSpread) return 1;
@@ -111,10 +111,12 @@ function getPropsAndPropsDerivedData(args: ExtractionArgs): PropsAndDerivedData 
 
   const spreadProps = props.filter((prop) => prop.isSpread);
   const hasSingleSpread = spreadProps.length === 1;
+  const shouldDestructureProps = destructureProps || spreadProps.length > 0;
 
   return {
     props,
     shouldDisplayTypeDeclaration,
+    shouldDestructureProps,
     ...(hasSingleSpread
       ? { hasSingleSpread, singleSpreadType: spreadProps[0].type }
       : { hasSingleSpread, singleSpreadType: undefined })
@@ -201,11 +203,14 @@ function buildFunctionArgumentsType(args: BuildArgs) {
 }
 
 function buildFunctionArguments(args: BuildArgs) {
-  const { props, hasSingleSpread } = args;
+  const { props, hasSingleSpread, shouldDestructureProps } = args;
+
+  if (props.length === 0) return '';
+
+  if (!shouldDestructureProps) return 'props';
 
   const boundProps = props.map(({ name, isSpread }) => (isSpread && hasSingleSpread ? `...${name}` : name)).join(',\n');
-  const functionArguments = `${props.length > 0 ? `{ ${boundProps} }` : ''}`;
-  return functionArguments;
+  return `{ ${boundProps} }`;
 }
 
 function buildFunctionExplicitType(args: BuildArgs) {
@@ -230,10 +235,17 @@ function buildFunctionBody(args: BuildArgs) {
     explicitReturnStatement,
     functionDeclaration: functionDeclarationType,
     range,
-    shouldWrapInFragments
+    shouldWrapInFragments,
+    shouldDestructureProps,
+    props
   } = args;
 
-  const functionReturn = shouldWrapInFragments ? `<>\n${document.getText(range)}\n</>` : document.getText(range);
+  const selection =
+    shouldDestructureProps || props.length === 0
+      ? document.getText(range)
+      : props.reduce((selection, prop) => replacePropValues(prop.name, selection), document.getText(range));
+
+  const functionReturn = shouldWrapInFragments ? `<>\n${selection}\n</>` : selection;
 
   if (functionDeclarationType === 'arrow' && !explicitReturnStatement) {
     return `(
