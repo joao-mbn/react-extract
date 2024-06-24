@@ -217,5 +217,31 @@ suite('replacePropValues', function () {
     const result = replacePropValues(prop, jsx);
     assert.strictEqual(result, expected);
   });
+
+  test('should replace prop values in inline short hand assignments', function () {
+    const prop = 'myClass';
+    const jsx = `
+      <div>
+        <Child values={{ myClass }} />
+        <Child values={{myClass}} />
+        <Child values={{ myClass, myClass1 }} />
+        <Child values={{ myClass1, myClass, myClass2 }} />
+        <Child values={{ myClass1, myClass2, myClass }} />
+        <Child values={{ myClass, }} />
+      </div>
+    `;
+    const expected = `
+      <div>
+        <Child values={{ myClass: props.myClass }} />
+        <Child values={{myClass: props.myClass}} />
+        <Child values={{ myClass: props.myClass, myClass1 }} />
+        <Child values={{ myClass1, myClass: props.myClass, myClass2 }} />
+        <Child values={{ myClass1, myClass2, myClass: props.myClass }} />
+        <Child values={{ myClass: props.myClass, }} />
+      </div>
+    `;
+    const result = replacePropValues(prop, jsx);
+    assert.strictEqual(result, expected);
+  });
 });
 

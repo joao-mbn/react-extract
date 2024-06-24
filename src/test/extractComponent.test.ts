@@ -625,6 +625,25 @@ suite('buildExtractedComponent', function () {
   );
 
   suite(
+    'extracts a component with undestructured props, if so configured, when there is a short hand assignment',
+    function () {
+      test('with typescript', async function () {
+        const range = new vscode.Range(new vscode.Position(17, 4), new vscode.Position(25, 6));
+        const { tsTest, tsResult } = await getDocuments('undestructuredPropsShortHand');
+        await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: tsTest, range });
+        assertExtraction(tsResult.getText(), tsTest.getText());
+      });
+
+      test('with javascript', async function () {
+        const range = new vscode.Range(new vscode.Position(17, 4), new vscode.Position(25, 6));
+        const { jsTest, jsResult } = await getDocuments('undestructuredPropsShortHand');
+        await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: jsTest, range });
+        assertExtraction(jsResult.getText(), jsTest.getText());
+      });
+    }
+  );
+
+  suite(
     'extracts a component with undestructured props, if so configured, when there is a spread assignment',
     function () {
       test('with typescript', async function () {
