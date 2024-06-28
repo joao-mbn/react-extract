@@ -49,13 +49,19 @@ async function getDocuments(folder: string) {
 suite('buildExtractedComponent', function () {
   const defaultArgs: Pick<
     ExtractionArgs,
-    'componentName' | 'functionDeclaration' | 'typeDeclaration' | 'declareWithReactFC' | 'explicitReturnStatement'
+    | 'componentName'
+    | 'functionDeclaration'
+    | 'typeDeclaration'
+    | 'declareWithReactFC'
+    | 'explicitReturnStatement'
+    | 'destructureProps'
   > = {
     componentName: 'Extracted',
     functionDeclaration: 'function',
     typeDeclaration: 'interface',
     explicitReturnStatement: false,
-    declareWithReactFC: false
+    declareWithReactFC: false,
+    destructureProps: true
   };
 
   suite('extracts a nested component without any props', function () {
@@ -398,6 +404,49 @@ suite('buildExtractedComponent', function () {
     });
   });
 
+  suite('builds type as inline declaration if so configured', function () {
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(7, 4), new vscode.Position(9, 10));
+      const { tsTest, tsResult } = await getDocuments('typeInlineDeclaration');
+      await buildExtractedComponent({ ...defaultArgs, typeDeclaration: 'inline', document: tsTest, range });
+      assertExtraction(tsResult.getText(), tsTest.getText());
+    });
+  });
+
+  suite('builds no type as inline declaration if there are no props', function () {
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
+      const { tsTest, tsResult } = await getDocuments('typeInlineDeclarationEmpty');
+      await buildExtractedComponent({ ...defaultArgs, typeDeclaration: 'inline', document: tsTest, range });
+      assertExtraction(tsResult.getText(), tsTest.getText());
+    });
+  });
+
+  suite('builds type as inline declaration if so configured, with type extension', function () {
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(9, 10));
+      const { tsTest, tsResult } = await getDocuments('typeInlineDeclarationExtended');
+      await buildExtractedComponent({ ...defaultArgs, typeDeclaration: 'inline', document: tsTest, range });
+      assertExtraction(tsResult.getText(), tsTest.getText());
+    });
+  });
+
+  suite('builds type as inline declaration if so configured, with ReactFC type declaration', function () {
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(7, 4), new vscode.Position(9, 10));
+      const { tsTest, tsResult } = await getDocuments('typeInlineDeclarationReactFC');
+      await buildExtractedComponent({
+        ...defaultArgs,
+        functionDeclaration: 'arrow',
+        declareWithReactFC: true,
+        typeDeclaration: 'inline',
+        document: tsTest,
+        range
+      });
+      assertExtraction(tsResult.getText(), tsTest.getText());
+    });
+  });
+
   suite('builds type as type declaration if so configured', function () {
     test('with typescript', async function () {
       const range = new vscode.Range(new vscode.Position(7, 4), new vscode.Position(9, 10));
@@ -407,7 +456,7 @@ suite('buildExtractedComponent', function () {
     });
   });
 
-  suite('builds no type as type declaration if there is are props', function () {
+  suite('builds no type as type declaration if there are no props', function () {
     test('with typescript', async function () {
       const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
       const { tsTest, tsResult } = await getDocuments('typeTypeDeclarationEmpty');
@@ -536,6 +585,69 @@ suite('buildExtractedComponent', function () {
       const range = new vscode.Range(new vscode.Position(5, 6), new vscode.Position(7, 21));
       const { jsTest, jsResult } = await getDocuments('wrapInFragment');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
+      assertExtraction(jsResult.getText(), jsTest.getText());
+    });
+  });
+
+  suite('extracts a component with undestructured props, if so configured', function () {
+    test('with typescript', async function () {
+      const range = new vscode.Range(new vscode.Position(7, 4), new vscode.Position(9, 10));
+      const { tsTest, tsResult } = await getDocuments('undestructuredProps');
+      await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: tsTest, range });
+      assertExtraction(tsResult.getText(), tsTest.getText());
+    });
+
+    test('with javascript', async function () {
+      const range = new vscode.Range(new vscode.Position(7, 4), new vscode.Position(9, 10));
+      const { jsTest, jsResult } = await getDocuments('undestructuredProps');
+      await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: jsTest, range });
+      assertExtraction(jsResult.getText(), jsTest.getText());
+    });
+  });
+
+  suite(
+    'extracts a component with no props, if it does not have any, despite being configured as undestructured props',
+    function () {
+      test('with typescript', async function () {
+        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
+        const { tsTest, tsResult } = await getDocuments('undestructuredPropsEmpty');
+        await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: tsTest, range });
+        assertExtraction(tsResult.getText(), tsTest.getText());
+      });
+
+      test('with javascript', async function () {
+        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
+        const { jsTest, jsResult } = await getDocuments('undestructuredPropsEmpty');
+        await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: jsTest, range });
+        assertExtraction(jsResult.getText(), jsTest.getText());
+      });
+    }
+  );
+
+  suite(
+    'extracts a component with destructured props, even if it is configured as undestructured props, if there are any spread attribute',
+    function () {
+      test('with typescript', async function () {
+        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
+        const { tsTest, tsResult } = await getDocuments('undestructuredPropsSpreadAttribute');
+        await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: tsTest, range });
+        assertExtraction(tsResult.getText(), tsTest.getText());
+      });
+
+      test('with javascript', async function () {
+        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
+        const { jsTest, jsResult } = await getDocuments('undestructuredPropsSpreadAttribute');
+        await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: jsTest, range });
+        assertExtraction(jsResult.getText(), jsTest.getText());
+      });
+    }
+  );
+
+  suite('extracts a component with undestructured props, if so configured, in complex scenarios', function () {
+    test('with javascript', async function () {
+      const range = new vscode.Range(new vscode.Position(24, 4), new vscode.Position(58, 7));
+      const { jsTest, jsResult } = await getDocuments('undestructuredPropsExtended');
+      await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
   });

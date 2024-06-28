@@ -12,9 +12,10 @@ export type ExternalArgs = {
   range: vscode.Range | vscode.Selection;
   componentName: string;
   functionDeclaration: 'function' | 'arrow';
-  typeDeclaration: 'interface' | 'type';
+  typeDeclaration: 'interface' | 'type' | 'inline';
   declareWithReactFC: boolean;
   explicitReturnStatement: boolean;
+  destructureProps: boolean;
 };
 
 export type ArgsDerivedFromExternalArgs = {
@@ -29,6 +30,7 @@ export type ExtractionArgs = ExternalArgs & ArgsDerivedFromExternalArgs;
 export type PropsAndDerivedData = SingleSpread & {
   props: ExtractedProp[];
   shouldDisplayTypeDeclaration: boolean;
+  shouldDestructureProps: boolean;
 };
 
 type SingleSpread =
@@ -41,5 +43,10 @@ type SingleSpread =
       singleSpreadType: undefined;
     };
 
-export type BuildArgs = ExtractionArgs & PropsAndDerivedData & { shouldWrapInFragments: boolean };
+export type TypeDeclarationInfo = {
+  typeDeclarationBody: string;
+  typeDeclarationReference: string;
+};
+
+export type BuildArgs = ExtractionArgs & PropsAndDerivedData & TypeDeclarationInfo & { shouldWrapInFragments: boolean };
 

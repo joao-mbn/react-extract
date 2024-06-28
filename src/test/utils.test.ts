@@ -126,3 +126,4 @@ suite('chooseAdequateType', function () {
     assert.strictEqual(result, expected);
   });
 });
+

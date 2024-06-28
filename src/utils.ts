@@ -20,3 +20,4 @@ export function chooseAdequateType(resolvedType: string, heuristicType: string) 
 
   return 'any';
 }
+

@@ -34,7 +34,7 @@ You may customize the way that the extracted component is built, with the follow
 
 - **Description**: The type of type declaration to be used when extracting the component.
 
-- **Accepts**: `"interface" | "type"`
+- **Accepts**: `"interface" | "type" | "inline"`
 
 - **Default**: `"interface"`
 
@@ -48,6 +48,11 @@ interface ComponentProps {
 type ComponentProps = {
   // ...
 };
+
+// inline
+function Component(props: { onClick: () => void; value: number; options: number[] }) {
+  // ...
+}
 ```
 
 #### "Function Declaration" | "reactExtract.functionDeclaration"
@@ -90,6 +95,54 @@ const Component = ({...props}: ComponentProps) => (
 )
 ```
 
+#### "Destructure Props" | "reactExtract.destructureProps"
+
+- **Description**: Whether to do object destructure in the extracted component props parameter or not. If set to "false", the parameter will be named "props".
+
+- **Accepts**: `"true" | "false"`
+
+- **Default**: `"true"`
+
+```tsx
+// true
+function Component({ onClick, className }: ComponentProps) {
+  return <ChildComponent onClick={onClick} className={className} />;
+}
+
+// false
+function Component(props: ComponentProps) {
+  return <ChildComponent onClick={props.onClick} className={props.className} />;
+}
+```
+
+_Note: If Destructure Props is set to false, but one of the props is a spread, props will be passed as destructured. Example:_
+
+```jsx
+// Before extraction
+function Parent() {
+  const childProps = {
+    className: 'myClass',
+    onClick: () => console.log('Clicked!')
+  };
+
+  return <div {...childProps}>Child Component</div>;
+}
+
+// After extraction
+function Parent() {
+  const childProps = {
+    className: 'myClass',
+    onClick: () => console.log('Clicked!')
+  };
+
+  return <Child {...childProps} />;
+}
+
+function Child({ ...childProps }) {
+  return <div {...childProps}>Child Component</div>;
+}
+```
+
 #### "Explicit Return Statement" | "reactExtract.explicitReturnStatement"
 
 - **Description**: Whether to create the extracted component with explicit return statement or not. [Only takes effect if "Function Declaration" is set to "Arrow Function"].
@@ -98,14 +151,14 @@ const Component = ({...props}: ComponentProps) => (
 
 - **Default**: `"false"`
 
-```typescript
+```tsx
 // true
-const Component: React.FC<ComponentProps> = ({...props}) => {
-  return (<Extracted />)
-}
+const Component: React.FC<ComponentProps> = ({ ...props }) => {
+  return <Extracted />;
+};
 
 // false
-const Component = ({...props}: ComponentProps) => (<Extracted />)
+const Component = ({ ...props }: ComponentProps) => <Extracted />;
 ```
 
 ## Contributions
