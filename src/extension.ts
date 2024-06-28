@@ -38,4 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.commands.registerCommand('reactExtract.extractComponent', extractComponent));
 }
 
-export function deactivate() {}
+export function deactivate() {
+  // reset PR check
+}
+
