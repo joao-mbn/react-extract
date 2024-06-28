@@ -2,9 +2,10 @@ import * as vscode from 'vscode';
 import { isFileTypescript } from './checks';
 import { extractProps } from './parsers/extractProps';
 import { determineIfShouldWrapInFragments } from './parsers/fragment';
+import { replacePropsWithFullPath } from './parsers/replacePropsWithFullPath';
 import { ArgsDerivedFromExternalArgs, BuildArgs, ExternalArgs, ExtractionArgs, PropsAndDerivedData } from './types';
 import { getProgramAndSourceFile } from './typescriptProgram';
-import { capitalizeComponentName, removeNonWordCharacters, replacePropValues } from './utils';
+import { capitalizeComponentName, removeNonWordCharacters } from './utils';
 
 export async function extractComponent(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
   const componentName = await getComponentName();
@@ -241,9 +242,7 @@ function buildFunctionBody(args: BuildArgs) {
   } = args;
 
   const selection =
-    shouldDestructureProps || props.length === 0
-      ? document.getText(range)
-      : props.reduce((selection, prop) => replacePropValues(prop.name, selection), document.getText(range));
+    shouldDestructureProps || props.length === 0 ? document.getText(range) : replacePropsWithFullPath(args);
 
   const functionReturn = shouldWrapInFragments ? `<>\n${selection}\n</>` : selection;
 
