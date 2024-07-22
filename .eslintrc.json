@@ -26,12 +26,6 @@
     "@typescript-eslint/no-unused-vars": ["warn", { "varsIgnorePattern": "^_" }],
     "no-throw-literal": "warn"
   },
-  "ignorePatterns": [
-    "out",
-    "dist",
-    "**/*.d.ts",
-    "node_modules",
-    /* "src/test/components/", */ "src/test/createTestCase.js"
-  ]
+  "ignorePatterns": ["out", "dist", "**/*.d.ts", "node_modules", "src/test/components/", "src/test/createTestCase.js"]
 }
 
