@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+## [0.10.0] - 2024-07-21
+
+### Changed
+
+- Extension no longer looks for diagnostics results to decide whether the extract option will show.
+- Verification for whether selection is JSX deterministic as opposed to a good guess.
+
 ## [0.9.0] - 2024-06-28
 
 ### Added
