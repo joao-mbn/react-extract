@@ -38,6 +38,7 @@ function visit(args: VisitorArguments) {
   // empty JSX text nodes appear when breaking lines with nesting and should be ignored
   if (document.getText(nodeRange) === '') return;
 
-  const isOuterMostSelectedNode = !range.contains(getNodeRange(parent, sourceFile));
-  isOuterMostSelectedNode && outermostSelectedNodes.add(node);
+  const isOutermostSelectedNode = !range.contains(getNodeRange(parent, sourceFile));
+  isOutermostSelectedNode && outermostSelectedNodes.add(node);
 }
+

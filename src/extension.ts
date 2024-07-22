@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { isSelectionLikelyJsx } from './checks';
 import { extractComponent } from './extractComponent';
+import { isJsx } from './parsers/isJsx';
 
 class ExtractOnRefactorProvider implements vscode.CodeActionProvider {
   provideCodeActions(
@@ -8,9 +8,9 @@ class ExtractOnRefactorProvider implements vscode.CodeActionProvider {
     range: vscode.Range | vscode.Selection,
     context: vscode.CodeActionContext
   ) {
-    if (!isSelectionLikelyJsx(document, range, context)) {
-      return [];
-    }
+    if (context.only && !context.only.contains(vscode.CodeActionKind.Refactor)) return [];
+
+    if (!isJsx(document, range)) return [];
 
     const refactor = new vscode.CodeAction('React Extract: Extract Component', vscode.CodeActionKind.Refactor);
 
@@ -29,9 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.languages.registerCodeActionsProvider(
       [{ pattern: '{**/*.js,**/*.ts,**/*.jsx,**/*.tsx}' }],
       new ExtractOnRefactorProvider(),
-      {
-        providedCodeActionKinds: [vscode.CodeActionKind.Refactor]
-      }
+      { providedCodeActionKinds: [vscode.CodeActionKind.Refactor] }
     )
   );
 

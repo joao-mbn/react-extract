@@ -1,9 +1,7 @@
 import * as assert from 'assert';
-import fs from 'fs';
-import path from 'path';
-import * as vscode from 'vscode';
 import { buildExtractedComponent } from '../extractComponent';
 import { ExtractionArgs } from '../types';
+import { getDocumentsAndRange } from './common';
 
 interface AssertExtractionFlags {
   keepSemiColons?: boolean;
@@ -22,28 +20,6 @@ function assertExtraction(expected: string, result: string, { keepSemiColons = f
   };
 
   return assert.strictEqual(parser(result), parser(expected));
-}
-
-async function getDocuments(folder: string) {
-  const filePath = path.join(__dirname, '../../src/test/components/', folder);
-  const fileNames = fs.readdirSync(filePath);
-
-  const tsResultFilePath = fileNames.find((fileName) => fileName.endsWith('Result.tsx'));
-  const tsTestFilePath = fileNames.find((fileName) => !fileName.endsWith('Result.tsx') && fileName.endsWith('.tsx'));
-  const jsResultFilePath = fileNames.find((fileName) => fileName.endsWith('Result.jsx'));
-  const jsTestFilePath = fileNames.find((fileName) => !fileName.endsWith('Result.jsx') && fileName.endsWith('.jsx'));
-
-  const [tsResult, tsTest, jsResult, jsTest] = await Promise.all([
-    tsResultFilePath && vscode.workspace.openTextDocument(path.join(filePath, tsResultFilePath)),
-    tsTestFilePath && vscode.workspace.openTextDocument(path.join(filePath, tsTestFilePath)),
-    jsResultFilePath && vscode.workspace.openTextDocument(path.join(filePath, jsResultFilePath)),
-    jsTestFilePath && vscode.workspace.openTextDocument(path.join(filePath, jsTestFilePath))
-  ]);
-
-  return { tsResult, tsTest, jsResult, jsTest } as Record<
-    'tsResult' | 'tsTest' | 'jsResult' | 'jsTest',
-    vscode.TextDocument
-  >;
 }
 
 suite('buildExtractedComponent', function () {
@@ -66,15 +42,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a nested component without any props', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(9, 10));
-      const { tsTest, tsResult } = await getDocuments('noProps');
+      const {
+        ranges: { typescript: range },
+        tsTest,
+        tsResult
+      } = await getDocumentsAndRange('noProps');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(9, 10));
-      const { jsTest, jsResult } = await getDocuments('noProps');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('noProps');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -82,15 +64,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a nested component using fragments', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(11, 7));
-      const { tsTest, tsResult } = await getDocuments('fragment');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('fragment');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(11, 7));
-      const { jsTest, jsResult } = await getDocuments('fragment');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('fragment');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -98,15 +86,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a simple nested component with only static props', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(5, 4), new vscode.Position(10, 10));
-      const { tsTest, tsResult } = await getDocuments('onlyStatic');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('onlyStatic');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(5, 4), new vscode.Position(10, 10));
-      const { jsTest, jsResult } = await getDocuments('onlyStatic');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('onlyStatic');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -114,15 +108,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component with a mix of static and non-static props', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(8, 4), new vscode.Position(18, 10));
-      const { tsTest, tsResult } = await getDocuments('static');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('static');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(8, 4), new vscode.Position(18, 10));
-      const { jsTest, jsResult } = await getDocuments('static');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('static');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -130,15 +130,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component with implicitly true variables', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(12, 11));
-      const { tsTest, tsResult } = await getDocuments('implicit');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('implicit');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(12, 11));
-      const { jsTest, jsResult } = await getDocuments('implicit');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('implicit');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -146,15 +152,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component having a conditional rendering patterns', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(5, 4), new vscode.Position(10, 10));
-      const { tsTest, tsResult } = await getDocuments('conditional');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('conditional');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(5, 4), new vscode.Position(10, 10));
-      const { jsTest, jsResult } = await getDocuments('conditional');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('conditional');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -162,15 +174,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component having a function as props, the function itself return a component', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(13, 4), new vscode.Position(16, 10));
-      const { tsTest, tsResult } = await getDocuments('componentAsFunction');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('componentAsFunction');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(13, 4), new vscode.Position(16, 10));
-      const { jsTest, jsResult } = await getDocuments('componentAsFunction');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('componentAsFunction');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -178,15 +196,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component passing another component as props', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(13, 4), new vscode.Position(16, 10));
-      const { tsTest, tsResult } = await getDocuments('componentAsProps');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('componentAsProps');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(13, 4), new vscode.Position(16, 10));
-      const { jsTest, jsResult } = await getDocuments('componentAsProps');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('componentAsProps');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -194,15 +218,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component containing a dynamic rendering with map', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(18, 4), new vscode.Position(25, 7));
-      const { tsTest, tsResult } = await getDocuments('map');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('map');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(18, 4), new vscode.Position(25, 7));
-      const { jsTest, jsResult } = await getDocuments('map');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('map');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -210,15 +240,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component that only a part of the component tree of the place it got extracted from', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(12, 6), new vscode.Position(15, 34));
-      const { tsTest, tsResult } = await getDocuments('subSelection');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('subSelection');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(12, 6), new vscode.Position(15, 34));
-      const { jsTest, jsResult } = await getDocuments('subSelection');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('subSelection');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -226,15 +262,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component where children is a text', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(9, 10));
-      const { tsTest, tsResult } = await getDocuments('textChild');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('textChild');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(9, 10));
-      const { jsTest, jsResult } = await getDocuments('textChild');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('textChild');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -242,15 +284,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component with short-hand properties', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(18, 4), new vscode.Position(26, 6));
-      const { tsTest, tsResult } = await getDocuments('shortHand');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('shortHand');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(18, 4), new vscode.Position(26, 6));
-      const { jsTest, jsResult } = await getDocuments('shortHand');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('shortHand');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -258,8 +306,11 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component where the prop type is too big to be fully displayed', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(38, 9), new vscode.Position(38, 39));
-      const { tsTest, tsResult } = await getDocuments('longType');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('longType');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
@@ -267,15 +318,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component with complex pattern of properties and methods passed as props', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(21, 4), new vscode.Position(28, 6));
-      const { tsTest, tsResult } = await getDocuments('propertiesAndMethods');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('propertiesAndMethods');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(21, 4), new vscode.Position(28, 6));
-      const { jsTest, jsResult } = await getDocuments('propertiesAndMethods');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('propertiesAndMethods');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -283,15 +340,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component with prop declaration being a renamed destructured prop', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(5, 9), new vscode.Position(5, 42));
-      const { tsTest, tsResult } = await getDocuments('destructureRename');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('destructureRename');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(5, 9), new vscode.Position(5, 42));
-      const { jsTest, jsResult } = await getDocuments('destructureRename');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('destructureRename');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -299,15 +362,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component with props coming from a nested destructure statement', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(8, 9), new vscode.Position(8, 44));
-      const { tsTest, tsResult } = await getDocuments('destructureNested');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('destructureNested');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(8, 9), new vscode.Position(8, 44));
-      const { jsTest, jsResult } = await getDocuments('destructureNested');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('destructureNested');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -315,15 +384,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component having props passed from function parameter', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(13, 4), new vscode.Position(16, 10));
-      const { tsTest, tsResult } = await getDocuments('parameter');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('parameter');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(7, 10));
-      const { jsTest, jsResult } = await getDocuments('parameter');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('parameter');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -331,8 +406,11 @@ suite('buildExtractedComponent', function () {
 
   suite('infers parameter type from type reference', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(7, 10));
-      const { tsTest, tsResult } = await getDocuments('parameterTypeReference');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('parameterTypeReference');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
@@ -340,15 +418,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component using spread syntax', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(11, 9), new vscode.Position(11, 31));
-      const { tsTest, tsResult } = await getDocuments('spread');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('spread');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText(), { keepSemiColons: true });
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(3, 9), new vscode.Position(3, 31));
-      const { jsTest, jsResult } = await getDocuments('spread');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('spread');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -356,15 +440,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component using array spread syntax', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(12, 4), new vscode.Position(16, 10));
-      const { tsTest, tsResult } = await getDocuments('spreadArray');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('spreadArray');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(8, 4), new vscode.Position(12, 10));
-      const { jsTest, jsResult } = await getDocuments('spreadArray');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('spreadArray');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -372,15 +462,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component using having nested spread syntax', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(16, 4), new vscode.Position(21, 10));
-      const { tsTest, tsResult } = await getDocuments('spreadNested');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('spreadNested');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(8, 4), new vscode.Position(13, 10));
-      const { jsTest, jsResult } = await getDocuments('spreadNested');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('spreadNested');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -388,8 +484,11 @@ suite('buildExtractedComponent', function () {
 
   suite('infers types from type reference of a nested spread syntax', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(9, 10));
-      const { tsTest, tsResult } = await getDocuments('spreadNestedTypeReference');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('spreadNestedTypeReference');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
@@ -397,8 +496,11 @@ suite('buildExtractedComponent', function () {
 
   suite('infers default types from destructured and spread props from object binding typed as any', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
-      const { tsTest, tsResult } = await getDocuments('spreadAny');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('spreadAny');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
@@ -406,8 +508,11 @@ suite('buildExtractedComponent', function () {
 
   suite('builds type as inline declaration if so configured', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(7, 4), new vscode.Position(9, 10));
-      const { tsTest, tsResult } = await getDocuments('typeInlineDeclaration');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('typeInlineDeclaration');
       await buildExtractedComponent({ ...defaultArgs, typeDeclaration: 'inline', document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
@@ -415,8 +520,11 @@ suite('buildExtractedComponent', function () {
 
   suite('builds no type as inline declaration if there are no props', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
-      const { tsTest, tsResult } = await getDocuments('typeInlineDeclarationEmpty');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('typeInlineDeclarationEmpty');
       await buildExtractedComponent({ ...defaultArgs, typeDeclaration: 'inline', document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
@@ -424,8 +532,11 @@ suite('buildExtractedComponent', function () {
 
   suite('builds type as inline declaration if so configured, with type extension', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(9, 10));
-      const { tsTest, tsResult } = await getDocuments('typeInlineDeclarationExtended');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('typeInlineDeclarationExtended');
       await buildExtractedComponent({ ...defaultArgs, typeDeclaration: 'inline', document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
@@ -433,8 +544,11 @@ suite('buildExtractedComponent', function () {
 
   suite('builds type as inline declaration if so configured, with ReactFC type declaration', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(7, 4), new vscode.Position(9, 10));
-      const { tsTest, tsResult } = await getDocuments('typeInlineDeclarationReactFC');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('typeInlineDeclarationReactFC');
       await buildExtractedComponent({
         ...defaultArgs,
         functionDeclaration: 'arrow',
@@ -449,8 +563,11 @@ suite('buildExtractedComponent', function () {
 
   suite('builds type as type declaration if so configured', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(7, 4), new vscode.Position(9, 10));
-      const { tsTest, tsResult } = await getDocuments('typeTypeDeclaration');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('typeTypeDeclaration');
       await buildExtractedComponent({ ...defaultArgs, typeDeclaration: 'type', document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
@@ -458,8 +575,11 @@ suite('buildExtractedComponent', function () {
 
   suite('builds no type as type declaration if there are no props', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
-      const { tsTest, tsResult } = await getDocuments('typeTypeDeclarationEmpty');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('typeTypeDeclarationEmpty');
       await buildExtractedComponent({ ...defaultArgs, typeDeclaration: 'type', document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
@@ -467,8 +587,11 @@ suite('buildExtractedComponent', function () {
 
   suite('builds type as type declaration if so configured, with type extension', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(9, 10));
-      const { tsTest, tsResult } = await getDocuments('typeTypeDeclarationExtended');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('typeTypeDeclarationExtended');
       await buildExtractedComponent({ ...defaultArgs, typeDeclaration: 'type', document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
@@ -476,15 +599,21 @@ suite('buildExtractedComponent', function () {
 
   suite('builds the component as an arrow function if so configured, if there are no props', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
-      const { tsTest, tsResult } = await getDocuments('arrowFunctionDeclarationEmpty');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('arrowFunctionDeclarationEmpty');
       await buildExtractedComponent({ ...defaultArgs, functionDeclaration: 'arrow', document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
-      const { jsTest, jsResult } = await getDocuments('arrowFunctionDeclarationEmpty');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('arrowFunctionDeclarationEmpty');
       await buildExtractedComponent({ ...defaultArgs, functionDeclaration: 'arrow', document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -494,15 +623,21 @@ suite('buildExtractedComponent', function () {
     'builds the component as an arrow function if so configured, if there are props including spread props',
     function () {
       test('with typescript', async function () {
-        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(9, 10));
-        const { tsTest, tsResult } = await getDocuments('arrowFunctionDeclarationSpread');
+        const {
+          ranges: { typescript: range },
+          tsResult,
+          tsTest
+        } = await getDocumentsAndRange('arrowFunctionDeclarationSpread');
         await buildExtractedComponent({ ...defaultArgs, functionDeclaration: 'arrow', document: tsTest, range });
         assertExtraction(tsResult.getText(), tsTest.getText());
       });
 
       test('with javascript', async function () {
-        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(9, 10));
-        const { jsTest, jsResult } = await getDocuments('arrowFunctionDeclarationSpread');
+        const {
+          ranges: { javascript: range },
+          jsResult,
+          jsTest
+        } = await getDocumentsAndRange('arrowFunctionDeclarationSpread');
         await buildExtractedComponent({ ...defaultArgs, functionDeclaration: 'arrow', document: jsTest, range });
         assertExtraction(jsResult.getText(), jsTest.getText());
       });
@@ -511,8 +646,11 @@ suite('buildExtractedComponent', function () {
 
   suite('builds the component as an arrow function with explicit return statement, if so configured', function () {
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(7, 10));
-      const { jsTest, jsResult } = await getDocuments('arrowFunctionExplicitReturn');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('arrowFunctionExplicitReturn');
       await buildExtractedComponent({
         ...defaultArgs,
         functionDeclaration: 'arrow',
@@ -528,8 +666,11 @@ suite('buildExtractedComponent', function () {
     'builds the component as an arrow function, declaring using React.FC with props type, if so configured, ensuring that nothing is changed for javascript.',
     function () {
       test('with typescript', async function () {
-        const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(9, 10));
-        const { tsTest, tsResult } = await getDocuments('reactFCType');
+        const {
+          ranges: { typescript: range },
+          tsResult,
+          tsTest
+        } = await getDocumentsAndRange('reactFCType');
         await buildExtractedComponent({
           ...defaultArgs,
           functionDeclaration: 'arrow',
@@ -541,8 +682,11 @@ suite('buildExtractedComponent', function () {
       });
 
       test('with javascript', async function () {
-        const range = new vscode.Range(new vscode.Position(6, 4), new vscode.Position(9, 10));
-        const { jsTest, jsResult } = await getDocuments('reactFCType');
+        const {
+          ranges: { javascript: range },
+          jsResult,
+          jsTest
+        } = await getDocumentsAndRange('reactFCType');
         await buildExtractedComponent({
           ...defaultArgs,
           functionDeclaration: 'arrow',
@@ -559,8 +703,11 @@ suite('buildExtractedComponent', function () {
     'builds the component as an arrow function, declaring using React.FC without props type, if so configured',
     function () {
       test('with typescript', async function () {
-        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(7, 10));
-        const { tsTest, tsResult } = await getDocuments('reactFCTypeEmpty');
+        const {
+          ranges: { typescript: range },
+          tsResult,
+          tsTest
+        } = await getDocumentsAndRange('reactFCTypeEmpty');
         await buildExtractedComponent({
           ...defaultArgs,
           functionDeclaration: 'arrow',
@@ -575,15 +722,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component wrapping it in fragments if necessary', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(5, 6), new vscode.Position(7, 21));
-      const { tsTest, tsResult } = await getDocuments('wrapInFragment');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('wrapInFragment');
       await buildExtractedComponent({ ...defaultArgs, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(5, 6), new vscode.Position(7, 21));
-      const { jsTest, jsResult } = await getDocuments('wrapInFragment');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('wrapInFragment');
       await buildExtractedComponent({ ...defaultArgs, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -591,15 +744,21 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component with undestructured props, if so configured', function () {
     test('with typescript', async function () {
-      const range = new vscode.Range(new vscode.Position(7, 4), new vscode.Position(9, 10));
-      const { tsTest, tsResult } = await getDocuments('undestructuredProps');
+      const {
+        ranges: { typescript: range },
+        tsResult,
+        tsTest
+      } = await getDocumentsAndRange('undestructuredProps');
       await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: tsTest, range });
       assertExtraction(tsResult.getText(), tsTest.getText());
     });
 
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(7, 4), new vscode.Position(9, 10));
-      const { jsTest, jsResult } = await getDocuments('undestructuredProps');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('undestructuredProps');
       await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
@@ -609,15 +768,21 @@ suite('buildExtractedComponent', function () {
     'extracts a component with no props, if it does not have any, despite being configured as undestructured props',
     function () {
       test('with typescript', async function () {
-        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
-        const { tsTest, tsResult } = await getDocuments('undestructuredPropsEmpty');
+        const {
+          ranges: { typescript: range },
+          tsResult,
+          tsTest
+        } = await getDocumentsAndRange('undestructuredPropsEmpty');
         await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: tsTest, range });
         assertExtraction(tsResult.getText(), tsTest.getText());
       });
 
       test('with javascript', async function () {
-        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
-        const { jsTest, jsResult } = await getDocuments('undestructuredPropsEmpty');
+        const {
+          ranges: { javascript: range },
+          jsResult,
+          jsTest
+        } = await getDocumentsAndRange('undestructuredPropsEmpty');
         await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: jsTest, range });
         assertExtraction(jsResult.getText(), jsTest.getText());
       });
@@ -628,15 +793,21 @@ suite('buildExtractedComponent', function () {
     'extracts a component with destructured props, even if it is configured as undestructured props, if there are any spread attribute',
     function () {
       test('with typescript', async function () {
-        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
-        const { tsTest, tsResult } = await getDocuments('undestructuredPropsSpreadAttribute');
+        const {
+          ranges: { typescript: range },
+          tsResult,
+          tsTest
+        } = await getDocumentsAndRange('undestructuredPropsSpreadAttribute');
         await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: tsTest, range });
         assertExtraction(tsResult.getText(), tsTest.getText());
       });
 
       test('with javascript', async function () {
-        const range = new vscode.Range(new vscode.Position(4, 4), new vscode.Position(6, 10));
-        const { jsTest, jsResult } = await getDocuments('undestructuredPropsSpreadAttribute');
+        const {
+          ranges: { javascript: range },
+          jsResult,
+          jsTest
+        } = await getDocumentsAndRange('undestructuredPropsSpreadAttribute');
         await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: jsTest, range });
         assertExtraction(jsResult.getText(), jsTest.getText());
       });
@@ -645,8 +816,11 @@ suite('buildExtractedComponent', function () {
 
   suite('extracts a component with undestructured props, if so configured, in complex scenarios', function () {
     test('with javascript', async function () {
-      const range = new vscode.Range(new vscode.Position(24, 4), new vscode.Position(58, 7));
-      const { jsTest, jsResult } = await getDocuments('undestructuredPropsExtended');
+      const {
+        ranges: { javascript: range },
+        jsResult,
+        jsTest
+      } = await getDocumentsAndRange('undestructuredPropsExtended');
       await buildExtractedComponent({ ...defaultArgs, destructureProps: false, document: jsTest, range });
       assertExtraction(jsResult.getText(), jsTest.getText());
     });
